@@ -1,0 +1,43 @@
+2022-06-21
+宠物之家 本项目是一个（Online To Offline）以宠物为核心打造的宠物乐园o2o项目
+        O2O：通过互联网手段挖掘机会，最终要到线下消费
+    项目模块：用户模块，订单模块，服务模块，宠物模块，支付模块，组织机构模块，系统管理模块
+        寻主模块，报表模块，店铺管理...
+
+    项目架构模式：前后端分离
+
+    前端技术栈：VUE+ElementUI+H5+JQuery+CSS3..
+
+    后端技术栈：SpringBoot+SpringMVC+mybatis+Redis+Fastdfs...
+        数据库：mysql
+
+    端口规划：
+        前台前端：80
+        后台前端：8081
+        后端：8080
+
+    分页：
+        1，创建一个公共的查询类 BaseQuery
+            包含两个字段：
+            private Integer currentPage = 1; // 当前页码
+            private Integer pageSize = 5; // 每页展示条数
+            提供获取起始位置的可读属性
+            public Integer getBegin(){
+                return (currentPage - 1) * pageSize;
+            }
+        2，创建实体类的查询类 DepartmentQuery
+            1，继承公共查询类
+            2，编写高级查询所用的字段
+        3，在mapper中提供高级查询方法，和查询总条数方法
+        4，创建公共的查询结果类 PageList
+            包含两个字段：
+            private Integer total = 0;
+            private List<T> rows = new ArrayList<>;
+        4，在service实现类中编写高级查询方法
+            1，根据查询条件获取总条数
+            2，根据查询条件获取当前页数据
+            3，封装到查询结果类中并返回
+
+GIT 是一个开源的分布式版本控制系统
+
+Gitee(码云)  远程仓库 ，代码托管平台
