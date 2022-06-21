@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.raths.org.mapper.DepartmentMapper">
+    <!--查询所有-->
+    <select id="loadAll" resultType="Department">
+        select * from t_department
+    </select>
+
+    <!--根据id查询-->
+    <select id="loadById" resultType="Department">
+        select * from t_department where id = #{id}
+    </select>
+
+    <!--根据id删除-->
+    <delete id="remove">
+        delete
+        from t_department
+        where id = #{id}
+    </delete>
+
+    <!--修改-->
+    <update id="update">
+        update t_department set
+                        sn=#{sn},
+                        name=#{name},
+                        dirPath=#{dirPath},
+                        state=#{state},
+                        manager_id=#{manager_id},
+                        parent_id=#{parent_id}
+        where id = #{id}
+    </update>
+    <!--添加-->
+    <insert id="save">
+        insert into t_department (
+                    sn
+                    ,name
+                    ,dirPath
+                    ,state
+                    ,manager_id
+                    ,parent_id
+        )
+        values (
+                #{sn},
+                #{name},
+                #{dirPath},
+                #{state},
+                #{manager_id},
+                #{parent_id},
+               );
+    </insert>
+
+    <!--高级查询-->
+    <select id="queryList" resultType="Department">
+        select * from t_department
+
+        limit #{begin}, #{pagesize}
+    </select>
+
+   <!-- 当前查询总条数 -->
+    <select id="queryCount" resultType="int">
+        select count(id) from t_department
+    </select>
+</mapper>
