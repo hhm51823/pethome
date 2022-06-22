@@ -33,7 +33,7 @@
             包含两个字段：
             private Integer total = 0;
             private List<T> rows = new ArrayList<>;
-        4，在service实现类中编写高级查询方法
+        5，在service实现类中编写高级查询方法
             1，根据查询条件获取总条数
             2，根据查询条件获取当前页数据
             3，封装到查询结果类中并返回

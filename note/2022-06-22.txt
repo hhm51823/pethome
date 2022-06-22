@@ -1,0 +1,69 @@
+2022-06-22
+ElementUI 总结
+    单页面组件：其实页面路由最终展示的就是我们的.vue文件的内容，这个.vue文件就叫做单页面组件
+    单页面组件的好处：
+        1，组件可以重复使用
+        2，更加方便写Css样式
+        3，实现了模块化，可以将组件进行导入导出
+
+    单页面组件组成：
+        1，template： 编写Html页面代码
+        2，style ： css样式，scoped属性：样式只在当前组件生效
+        3，script： Vue实例的编写，所有的JS代码都写在里面
+
+    单页面使用：
+        在index.js中引入，并指定路由路径
+        在浏览器访问即可
+
+    ElementUI：
+        ElementUI是一套为开发者、设计师和产品经理准备的基于 Vue 2.0 的桌面端(PC端)组件库
+            是目前Vue最火的前端UI框架
+
+        使用：
+            1，在IDEA中安装：npm i element-ui -S
+            2，在单页面组件中引入
+               import ElementUI from 'element-ui';
+               import 'element-ui/lib/theme-chalk/index.css';
+               Vue.use(ElementUI);
+            3，将ElementUI官网中的组件copy到单页面组件中，注意不同的代码写在不同的标签中
+            4，在index.js中引入组件并设置路由路径，
+            5，浏览器访问
+
+    Mock & Axios：
+        Mock:是一款模拟数据生成器，旨在帮助前端攻城师独立于后端进行开发，帮助编写单元测试
+        Mock入门：
+            1，安装：npm install mockjs
+            2，在src中创建一个JS文件夹，创建js文件并写入mock的代码
+            3，在idea中的命令窗口中 先进入js文件夹：cd src/js
+            4，通过 node user.js  测试
+
+        在项目中并实现分页(Axios局部使用)：
+            1，在合适的位置创建JS文件，copy文档中的mock代码,该文件能够帮我实现假分页，
+                需要传入两个参数：
+                    参数1：请求地址
+                    参数2：包含当前页和总条数的json的对象
+            2，在当前组件的script标签中引入mock文件
+                import MockUser from './js/user/user.js'
+                安装Axios ：  npm install axios --save
+                当前组件的的script标签中引入Axios
+                import axios from "axios";
+            3，在methods中编写list函数，发送Axios请求
+                 axios.post("/user/list",{"currentPage":this.currentPage,"pageSize":this.pageSize})
+            4，在当前组件中copy相应的组件，设置vue实例的属性并在Html代码中绑定属性和事件
+            5，在methods对象中编写当前页和条数发送改变是被调用的函数，在函数中调用list()函数
+            6，在mounted钩子函数中调用list()函数
+            7，在index.js 引入组件并设置路由路径
+            8，浏览器访问
+
+        FastMock：
+           FastMock：是一个开源的，提供在线模拟数据和模拟接口的工具，无需我们再编写js文件
+           在FastMock官网中设置模拟数据接口
+
+        Axios全局使用：
+            1，在main.js中引入Axios并设置两个属性
+               axios.defaults.baseURL='FastMock中生成的公共路径'
+               Vue.prototype.$http = axios // 将axios设置为Vue的属性
+            2，在组件的发送Axios访问：
+                this.$http.get("/user/loadAll",{"currentPage":this.currentPage,"pageSize":this.pageSize})
+            3，剩余步骤和局部一样
+
