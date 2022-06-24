@@ -70,7 +70,7 @@ restful风格
             2，通过Vue的 `ProxyTable` 配置代理，proxyTable这种方案是让JS发往后端的请求发送给VUE自己，
                 VUE通过proxyTable把请求转发给后端，这样一来就不存在跨域了
             3，使用CrosFilter解决
-                在项目中创建CrosFilter配置文件，直接CV，配置放行域名
+                在项目中创建CrosFilter配置文件，直接CV，配置放行域名。
 
     部门列表展示
         前端：
