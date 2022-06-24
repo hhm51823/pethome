@@ -12,6 +12,6 @@ public class BaseQuery {
      * @return
      */
     public Integer getBegin(){
-        return (this.currentPage - 1) * pageSize;
+        return (this.currentPage - 1) * this.pageSize;
     }
 }

@@ -18,4 +18,10 @@ public class Department {
     private String manager_id;
     /** 上级部门id */
     private String parent_id;
+
+    /** 经理 */
+    private Employee manager;
+
+    /** 上级部门 */
+    private Department parent;
 }
