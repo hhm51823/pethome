@@ -3,6 +3,7 @@ package cn.raths.org.service.impl;
 import cn.raths.basic.utils.PageList;
 import cn.raths.org.domain.Department;
 import cn.raths.org.mapper.DepartmentMapper;
+import cn.raths.org.mapper.DepartmentMapper2;
 import cn.raths.org.query.DepartmentQuery;
 import cn.raths.org.service.IDepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,9 @@ public class DepartmentServiceIMpl implements IDepartmentService {
 
     @Autowired
     private DepartmentMapper departmentMapper;
+
+    @Autowired
+    private DepartmentMapper2 departmentMapper2;
 
     @Override
     public List<Department> loadAll() {
@@ -45,6 +49,13 @@ public class DepartmentServiceIMpl implements IDepartmentService {
     public PageList<Department> queryList(DepartmentQuery departmentQuery) {
         List<Department> rows = departmentMapper.queryList(departmentQuery);
         Integer total = departmentMapper.queryCount(departmentQuery);
+        return new PageList<>(total,rows);
+    }
+
+    @Override
+    public PageList<Department> queryList2(DepartmentQuery departmentQuery) {
+        List<Department> rows = departmentMapper2.queryList2(departmentQuery);
+        Integer total = departmentMapper2.queryCount2(departmentQuery);
         return new PageList<>(total,rows);
     }
 }

@@ -25,4 +25,7 @@ public interface IDepartmentService {
     // 高级查询
     PageList<Department> queryList(DepartmentQuery departmentQuery);
 
+    // 高级查询
+    PageList<Department> queryList2(DepartmentQuery departmentQuery);
+
 }
