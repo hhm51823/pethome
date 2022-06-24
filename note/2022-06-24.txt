@@ -1,0 +1,110 @@
+restful风格
+    是一种面向资源的架构风格，是一种规范，可以简单理解为，使用URL名词定位资源，
+    用HTTP动词（GET、POST、DELETE、PUT、PATCH）来描述操作
+    客户端使用GET、POST、PUT、DELETE来表示操作方式的动词对服务端资源进行操作
+
+    常用注解：
+        1，@RestController 此注解是一个组合注解,相当于 @Controller + @ResponseBody。前后端分离，接口只负责返回数据了
+        2，确定请求方式的注解
+            @GetMapping
+            @DeleteMapping
+            @PutMapping
+            @PostMapping
+            ...
+        3，@PathVariable  根据路径中的参数名获取值
+            @PathVariable("id") Long id
+        4，@RequestBody 将前端传回的json数据转换为对象
+
+    常用方式：
+        查询：get请求
+        删除：delete请求
+        添加或修改：post/put请求
+
+    postman
+        一个帮助我们测试后端接口的工具，因为在前后端分离开发的情况下，我们要独立测试我们的接口
+
+        使用：
+            1，下载postman
+            2，双击运行
+            3，根据不同的请求方式，传入不同的参数进行测试
+
+    Swagger
+        Swagger 是一款RESTFUL`接口的文档在线自动生成+功能测试功能软件` （测试功能并不完善）
+
+        使用：
+            1，导入Swagger依赖
+            2，编写Swagger配置文件
+                RequestHandlerSelectors.basePackage("cn.raths")
+            3，浏览器访问：http://localhost:8080/swagger-ui.html
+
+        通过注释完善文档
+            1，@Api(value = "部门的API",description="部门相关的CRUD功能") ：打在Controller对Controller做描述
+            2，@ApiOperation(value = "通过ID查询" ) ：打在方法上，对方法做描述
+            3，@ApiParam(value="ID属性",required = true) ：打在参数前，对参数做描述
+
+前端项目的搭建
+    基础环境搭建
+        1，创建一个空项目
+            修改Project Structure中相关设置
+        2，创建两个web子模块
+            pethome-admin
+            pethome-web
+        3，将前端的集成vue-admin模板复制到项目中
+        4，修改ElementUI版本为2.15.1
+            重新执行命令  npm install
+            拉取完成后修改main.js文件中的elementui的index.js路径
+        5，修改端口号
+        6，启动项目进行测试
+    优化：
+        1，注释掉mock的引入
+        2，注释掉路由拦截
+        3，修改index.html中的<title>
+        4，修改home.vue的sysName属性值
+        5，因为elementui版本问题，修改控制table.vue中模态框是否显示的属性
+            v-model ==》  :visible.sync
+
+    跨域访问
+        前后台分离之后服务器不同导致域名不同，浏览器都基本禁止了跨域访问
+        解决办法：
+            1，通过Nginx反向代理解决(后面学)
+            2，通过Vue的 `ProxyTable` 配置代理，proxyTable这种方案是让JS发往后端的请求发送给VUE自己，
+                VUE通过proxyTable把请求转发给后端，这样一来就不存在跨域了
+            3，使用CrosFilter解决
+                在项目中创建CrosFilter配置文件，直接CV，配置放行域名
+
+    部门列表展示
+        前端：
+            1，赋值table.vue到views下的org文件中改名为department
+            2，在routes.js中引入部门组件并修改 导航一 的第一条为部门管理，绑定路由配置
+            3，将user替换为department
+            4，在main.js中引入Axios
+            5，找到钩子函数，在查询数据的函数中发送Axios请求
+                需要后端配置好跨域访问
+            6，修改页面表格的相关列的信息，以及设置查询相关属性
+            7，将查询到的数据放入departments，条数放入total
+            8，启动项目
+        后端：
+            1，在domain添加员工和部门两个对象
+            2，在SQL语句中多表联查查询到需要的数据
+            3，通过resultMap赋值
+
+    高级查询：
+        使用关键字查询多个列的数据
+        前端：
+            1，修改页面查询相关属性和提示，属性设置为keyword
+            2，修改其他需要使用keyword的位置
+            3，创建一个新函数专门用来实现高级查询
+            4，在函数中将页码初始化为1
+            5，调用查询方法
+        后端：
+            1，在部门查询类中添加keyword字段
+            2，在SQL语句中通过OR 关键字实现一个条件同时查询多个列
+
+    分页：
+        前端:
+            1，设置分页相关属性和触发事件
+            2，将所需参数封装到查询函数中
+            3，调用查询函数
+        后端：
+            1，通过limit实现分页
+            2，返回查询到的数据和条数
