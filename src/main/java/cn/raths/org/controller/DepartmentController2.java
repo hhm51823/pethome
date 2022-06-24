@@ -1,17 +1,15 @@
 package cn.raths.org.controller;
 
-import cn.raths.basic.utils.AjaxResult;
 import cn.raths.basic.utils.PageList;
 import cn.raths.org.domain.Department;
 import cn.raths.org.query.DepartmentQuery;
 import cn.raths.org.service.IDepartmentService;
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/department2")
@@ -31,6 +29,7 @@ public class DepartmentController2 {
     @PostMapping
     @ApiOperation(value = "高级查询")
     public PageList<Department> queryList2(@RequestBody DepartmentQuery departmentQuery){
+        System.out.println(departmentQuery);
         return departmentService.queryList2(departmentQuery);
     }
 }

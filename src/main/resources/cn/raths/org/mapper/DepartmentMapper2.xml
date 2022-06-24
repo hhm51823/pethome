@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="cn.raths.org.mapper.DepartmentMapper">
+<mapper namespace="cn.raths.org.mapper.DepartmentMapper2">
     <resultMap id="queryListResultMap" type="Department">
         <id property="id" column="id"></id>
         <result property="sn" column="sn"></result>
@@ -30,7 +30,7 @@
         </where>
     </sql>
     <!--高级查询-->
-    <select id="queryList" resultMap="queryListResultMap">
+    <select id="queryList2" resultMap="queryListResultMap">
         select d.*, e.id eId, e.username eName, p.id pId, p.name pName
         from t_department d
         left join t_employee e on d.manager_id = e.id
@@ -40,7 +40,7 @@
     </select>
 
    <!-- 当前查询总条数 -->
-    <select id="queryCount" resultType="int">
+    <select id="queryCount2" resultType="int">
         select count(d.id) from t_department d
         <include refid="queryListWhere"></include>
     </select>
