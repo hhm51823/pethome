@@ -32,7 +32,7 @@ public class DepartmentController {
     */
     @GetMapping("/{id}")
     @ApiOperation(value = "根据ID查询")
-    public Department loadById(@ApiParam(name = "部门主键", required = true) @PathVariable("id") Long id){
+    public Department loadById(@ApiParam(value = "部门主键", required = true) @PathVariable("id") Long id){
         return departmentService.loadById(id);
     }
 
@@ -62,7 +62,7 @@ public class DepartmentController {
     */
     @PutMapping
     @ApiOperation(value = "新增或修改部门")
-    public AjaxResult addOrUpt(@ApiParam(name="部门对象",required = true) @RequestBody Department department){
+    public AjaxResult addOrUpt(@ApiParam(value="部门对象",required = true) @RequestBody Department department){
         try {
             if(department.getId() == null){
                 departmentService.save(department);
@@ -87,7 +87,7 @@ public class DepartmentController {
     */
     @DeleteMapping("/{id}")
     @ApiOperation(value = "根据ID删除")
-    public AjaxResult remove(@ApiParam(name="主键ID",required = true) @PathVariable("id") Long id){
+    public AjaxResult remove(@ApiParam(value="主键ID",required = true) @PathVariable("id") Long id){
         try {
             departmentService.remove(id);
             return AjaxResult.getAjaxResult();
@@ -108,7 +108,7 @@ public class DepartmentController {
     */
     @PostMapping
     @ApiOperation(value = "高级查询")
-    public PageList<Department> queryList(@ApiParam(name="高级查询条件对象",required = true) @RequestBody DepartmentQuery departmentQuery){
+    public PageList<Department> queryList(@ApiParam(value="高级查询条件对象",required = true) @RequestBody DepartmentQuery departmentQuery){
         return departmentService.queryList(departmentQuery);
     }
 }
