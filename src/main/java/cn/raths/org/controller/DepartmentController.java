@@ -38,7 +38,7 @@ public class DepartmentController {
 
     /**
     * @Title: loadAll
-    * @Description: 查询所有
+    * @Description: 查询所有部门
     * @Author: Lynn
     * @Version: 1.0
     * @Date:  2022/6/24 13:07
