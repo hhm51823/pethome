@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.raths.org.mapper.EmployeeMapper">
+    <!--查询所有-->
+    <select id="loadAll" resultType="Employee">
+        select * from t_employee
+    </select>
+
+    <!--根据id查询-->
+    <select id="loadById" resultType="Employee">
+        select * from t_employee where id = #{id}
+    </select>
+
+    <!--根据id删除-->
+    <delete id="remove">
+        delete
+        from t_employee
+        where id = #{id}
+    </delete>
+
+    <!--修改-->
+    <update id="update">
+        update t_employee set
+                       username =#{username},
+                       phone =#{phone},
+                       email =#{email},
+                       salt =#{salt},
+                       password =#{password},
+                       age =#{age},
+                       state =#{state},
+                       department_id =#{department_id},
+                       logininfo_id =#{logininfo_id},
+                       shop_id =#{shop_id}
+        where id = #{id}
+    </update>
+    <!--添加-->
+    <insert id="save">
+        insert into t_employee (
+                username
+                ,phone
+                ,email
+                ,salt
+                ,password
+                ,age
+                ,state
+                ,department_id
+                ,logininfo_id
+                ,shop_id
+        )
+        values (
+                #{username},
+                #{phone},
+                #{email},
+                #{salt},
+                #{password},
+                #{age},
+                #{state},
+                #{department_id},
+                #{logininfo_id},
+                #{shop_id}
+               );
+    </insert>
+
+    <resultMap id="queryListResultMap" type="Employee">
+        <id property="id" column="id"></id>
+        <result property="username" column="username"></result>
+        <result property="phone" column="phone"></result>
+        <result property="email" column="email"></result>
+        <result property="salt" column="salt"></result>
+        <result property="password" column="password"></result>
+        <result property="age" column="age"></result>
+        <result property="state" column="state"></result>
+        <result property="department_id" column="department_id"></result>
+        <result property="logininfo_id" column="logininfo_id"></result>
+        <result property="shop_id" column="shop_id"></result>
+    </resultMap>
+
+    <sql id="queryListWhere">
+        <where>
+<!--            <if test="keyword != null and !''.equals(keyword.trim())">-->
+<!--                and d.name like concat('%',#{keyword},'%')-->
+<!--                or d.sn like concat('%',#{keyword},'%')-->
+<!--            </if>-->
+        </where>
+    </sql>
+    <!--高级查询-->
+    <select id="queryList" resultMap="queryListResultMap">
+        select *
+        from t_employee
+        <include refid="queryListWhere"></include>
+        limit #{begin}, #{pageSize}
+    </select>
+
+   <!-- 当前查询总条数 -->
+    <select id="queryCount" resultType="int">
+        select count(.id) from t_employee
+        <include refid="queryListWhere"></include>
+    </select>
+
+    <delete id="patchDel">
+        delete from t_employee where id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

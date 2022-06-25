@@ -27,12 +27,19 @@
                         name=#{name},
                         dirPath=#{dirPath},
                         state=#{state},
-                        manager_id=#{manager_id},
-                        parent_id=#{parent_id}
+                        <if test="manager_id != null">
+                            manager_id=#{manager_id},
+                            parent_id=#{parent_id}
+                        </if>
+                        <if test="manager_id == null">
+                            manager_id=#{manager.id},
+                            parent_id=#{parent.id}
+                        </if>
+
         where id = #{id}
     </update>
     <!--添加-->
-    <insert id="save">
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
         insert into t_department (
                     sn
                     ,name
@@ -46,8 +53,8 @@
                 #{name},
                 #{dirPath},
                 #{state},
-                #{manager_id},
-                #{parent_id}
+                #{manager.id},
+                #{parent.id}
                );
     </insert>
 
@@ -92,4 +99,11 @@
         select count(d.id) from t_department d
         <include refid="queryListWhere"></include>
     </select>
+
+    <delete id="patchDel">
+        delete from t_department where id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
 </mapper>

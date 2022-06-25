@@ -27,4 +27,7 @@ public interface DepartmentMapper {
 
     // 当前查询总条数
     Integer queryCount(DepartmentQuery departmentQuery);
+
+    // 根据id批量删除
+    void patchDel(Long[] ids);
 }

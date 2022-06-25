@@ -28,4 +28,8 @@ public interface IDepartmentService {
     // 高级查询
     PageList<Department> queryList2(DepartmentQuery departmentQuery);
 
+    // 批量删除
+    void patchDel(Long[] ids);
+
+    List<Department> loadTree();
 }
