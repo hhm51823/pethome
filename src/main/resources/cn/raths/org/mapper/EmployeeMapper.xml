@@ -30,9 +30,9 @@
                        password =#{password},
                        age =#{age},
                        state =#{state},
-                       department_id =#{department_id},
+                       department_id =#{department.id},
                        logininfo_id =#{logininfo_id},
-                       shop_id =#{shop_id}
+                       shop_id =#{shop.id}
         where id = #{id}
     </update>
     <!--添加-->
@@ -57,9 +57,9 @@
                 #{password},
                 #{age},
                 #{state},
-                #{department_id},
+                #{department.id},
                 #{logininfo_id},
-                #{shop_id}
+                #{shop.id}
                );
     </insert>
 
@@ -75,27 +75,38 @@
         <result property="department_id" column="department_id"></result>
         <result property="logininfo_id" column="logininfo_id"></result>
         <result property="shop_id" column="shop_id"></result>
+        <association property="department" javaType="Department">
+            <id property="id" column="dId"></id>
+            <result property="name" column="dName"></result>
+        </association>
+        <association property="shop" javaType="Shop">
+            <id property="id" column="sId"></id>
+            <result property="name" column="sName"></result>
+        </association>
     </resultMap>
 
     <sql id="queryListWhere">
         <where>
-<!--            <if test="keyword != null and !''.equals(keyword.trim())">-->
-<!--                and d.name like concat('%',#{keyword},'%')-->
-<!--                or d.sn like concat('%',#{keyword},'%')-->
-<!--            </if>-->
+            <if test="keyword != null and !''.equals(keyword.trim())">
+                and username like concat('%',#{keyword},'%')
+                or phone like concat('%',#{keyword},'%')
+                or email like concat('%',#{keyword},'%')
+            </if>
         </where>
     </sql>
     <!--高级查询-->
     <select id="queryList" resultMap="queryListResultMap">
-        select *
-        from t_employee
+        select e.*, d.id dId, d.name dName, s.id sId, s.name sName
+        from t_employee e
+            left join t_department d on e.department_id = d.id
+            left join t_shop s on e.shop_id = s.id
         <include refid="queryListWhere"></include>
         limit #{begin}, #{pageSize}
     </select>
 
    <!-- 当前查询总条数 -->
     <select id="queryCount" resultType="int">
-        select count(.id) from t_employee
+        select count(id) from t_employee
         <include refid="queryListWhere"></include>
     </select>
 

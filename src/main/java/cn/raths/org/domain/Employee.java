@@ -26,4 +26,10 @@ public class Employee {
     private Long logininfo_id;
     // 店铺id
     private Long shop_id;
+
+    // 所属部门
+    private Department department;
+
+    // 所属店铺
+    private Shop shop;
 }

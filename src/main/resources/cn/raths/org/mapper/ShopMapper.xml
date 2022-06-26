@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.raths.org.mapper.ShopMapper">
+    <!--查询所有-->
+    <select id="loadAll" resultType="Shop">
+        select * from t_shop
+    </select>
+
+    <!--根据id查询-->
+    <select id="loadById" resultType="Shop">
+        select * from t_shop where id = #{id}
+    </select>
+
+    <!--根据id删除-->
+    <delete id="remove">
+        delete
+        from t_shop
+        where id = #{id}
+    </delete>
+
+    <!--修改-->
+    <update id="update">
+        update t_shop set
+                  name=#{name},
+                  tel=#{tel},
+                  registerTime=#{registerTime},
+                  state=#{state},
+                  address=#{address},
+                  logo=#{logo},
+                  admin_id=#{boss.id}
+        where id = #{id}
+    </update>
+    <!--添加-->
+    <insert id="save">
+        insert into t_shop (
+            name
+            ,tel
+            ,registerTime
+            ,state
+            ,address
+            ,logo
+            ,admin_id
+        )
+        values (
+                   #{name},
+                   #{tel},
+                   #{registerTime},
+                   #{state},
+                   #{address},
+                   #{logo},
+                   #{boss.id}
+               );
+    </insert>
+
+    <resultMap id="queryListResultMap" type="Shop">
+        <id property="id" column="id"></id>
+        <result property="name" column="name"></result>
+        <result property="tel" column="tel"></result>
+        <result property="registerTime" column="registerTime"></result>
+        <result property="state" column="state"></result>
+        <result property="address" column="address"></result>
+        <result property="logo" column="logo"></result>
+        <result property="admin_id" column="admin_id"></result>
+        <association property="boss" javaType="Employee">
+            <id property="id" column="eId"></id>
+            <result property="username" column="eUsername"></result>
+        </association>
+    </resultMap>
+
+    <sql id="queryListWhere">
+        <where>
+            <if test="keyword != null and !''.equals(keyword.trim())">
+                and name like concat('%',#{keyword},'%')
+                or address like concat('%',#{keyword},'%')
+            </if>
+        </where>
+    </sql>
+    <!--高级查询-->
+    <select id="queryList" resultMap="queryListResultMap">
+        select s.*, e.id eId, e.username eUsername
+        from t_shop s left join t_employee e on s.admin_id = e.id
+        <include refid="queryListWhere"></include>
+        limit #{begin}, #{pageSize}
+    </select>
+
+    <!-- 当前查询总条数 -->
+    <select id="queryCount" resultType="int">
+        select count(id) from t_shop
+        <include refid="queryListWhere"></include>
+    </select>
+
+    <delete id="patchDel">
+        delete from t_shop where id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

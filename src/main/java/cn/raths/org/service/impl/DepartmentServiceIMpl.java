@@ -57,20 +57,12 @@ public class DepartmentServiceIMpl implements IDepartmentService {
         // 修改了父级部门
 
         if(!loadById.getDirPath().equals(department.getDirPath())){
-            System.out.println("===================");
             List<Department> depts = departmentMapper.loadAll();
-            List<Department> children = loadById.getChildren();
             for (Department dept : depts) {
                 if (dept.getParent_id() == loadById.getId()) {
-                    children.add(dept);
+                    dept.setDirPath(dirPath + "/" + dept.getId());
+                    departmentMapper.update(dept);
                 }
-            }
-            System.out.println(children);
-            System.out.println("===================");
-            for (Department child : children) {
-                System.out.println(child);
-                child.setDirPath(dirPath + "/" + child.getId());
-                departmentMapper.update(child);
             }
         }
     }

@@ -39,6 +39,9 @@ public class EmployeeServiceIMpl implements IEmployeeService {
 
     @Override
     public void save(Employee employee) {
+        if(employee.getPassword() == null || "".equals(employee.getPassword().trim())){
+            employee.setPassword("123456");
+        }
         employeeMapper.save(employee);
     }
 
