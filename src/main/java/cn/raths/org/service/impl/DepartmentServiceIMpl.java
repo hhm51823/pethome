@@ -25,9 +25,11 @@ public class DepartmentServiceIMpl extends BaseServiceImpl<Department> implement
         Department loadById = departmentMapper.loadById(department.getId());
 
         String dirPath = "";
-        Department deptTmp = departmentMapper.loadById(department.getParent().getId());
-        if(deptTmp != null){
-            dirPath = deptTmp.getDirPath();
+        if(department.getParent().getId() != null) {
+            Department deptTmp = departmentMapper.loadById(department.getParent().getId());
+            if (deptTmp != null) {
+                dirPath = deptTmp.getDirPath();
+            }
         }
         dirPath += "/" + department.getId();
         department.setDirPath(dirPath);
@@ -52,9 +54,11 @@ public class DepartmentServiceIMpl extends BaseServiceImpl<Department> implement
         departmentMapper.save(department);
 
         String dirPath = "";
-        Department deptTmp = departmentMapper.loadById(department.getParent().getId());
-        if(deptTmp != null){
-            dirPath = deptTmp.getDirPath();
+        if(department.getParent().getId() != null) {
+            Department deptTmp = departmentMapper.loadById(department.getParent().getId());
+            if (deptTmp != null) {
+                dirPath = deptTmp.getDirPath();
+            }
         }
         dirPath += "/" + department.getId();
         department.setDirPath(dirPath);
