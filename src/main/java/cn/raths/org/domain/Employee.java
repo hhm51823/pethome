@@ -1,11 +1,11 @@
 package cn.raths.org.domain;
 
+import cn.raths.basic.domain.BaseDomain;
 import lombok.Data;
 
 @Data
-public class Employee {
-    // 主键id
-    private Long id;
+public class Employee extends BaseDomain {
+
     // 员工姓名
     private String username;
     // 员工电话

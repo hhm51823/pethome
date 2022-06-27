@@ -1,5 +1,6 @@
 package cn.raths.org.domain;
 
+import cn.raths.basic.domain.BaseDomain;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
@@ -10,10 +11,8 @@ import java.util.Date;
 import java.util.List;
 
 @Data
-public class Shop {
+public class Shop extends BaseDomain {
 
-    /** 主键 */
-    private Long id;
 
     /** 店铺名称 */
     private String name;
