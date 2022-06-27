@@ -1,10 +1,8 @@
 package cn.raths.org.service.impl;
 
-import cn.raths.basic.utils.PageList;
+import cn.raths.basic.service.impl.BaseServiceImpl;
 import cn.raths.org.domain.Department;
 import cn.raths.org.mapper.DepartmentMapper;
-import cn.raths.org.mapper.DepartmentMapper2;
-import cn.raths.org.query.DepartmentQuery;
 import cn.raths.org.service.IDepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,28 +13,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-public class DepartmentServiceIMpl implements IDepartmentService {
+public class DepartmentServiceIMpl extends BaseServiceImpl<Department> implements IDepartmentService {
 
     @Autowired
     private DepartmentMapper departmentMapper;
 
-    @Autowired
-    private DepartmentMapper2 departmentMapper2;
-
-    @Override
-    public List<Department> loadAll() {
-        return departmentMapper.loadAll();
-    }
-
-    @Override
-    public Department loadById(Long id) {
-        return departmentMapper.loadById(id);
-    }
-
-    @Override
-    public void remove(Long id) {
-        departmentMapper.remove(id);
-    }
 
     @Override
     public void update(Department department) {
@@ -44,11 +25,9 @@ public class DepartmentServiceIMpl implements IDepartmentService {
         Department loadById = departmentMapper.loadById(department.getId());
 
         String dirPath = "";
-        if(department.getParent() != null){
-            Department deptTmp = departmentMapper.loadById(department.getParent().getId());
-            if(deptTmp != null){
-                dirPath = deptTmp.getDirPath();
-            }
+        Department deptTmp = departmentMapper.loadById(department.getParent().getId());
+        if(deptTmp != null){
+            dirPath = deptTmp.getDirPath();
         }
         dirPath += "/" + department.getId();
         department.setDirPath(dirPath);
@@ -73,11 +52,9 @@ public class DepartmentServiceIMpl implements IDepartmentService {
         departmentMapper.save(department);
 
         String dirPath = "";
-        if(department.getParent() != null){
-            Department deptTmp = departmentMapper.loadById(department.getParent().getId());
-            if(deptTmp != null){
-                dirPath = deptTmp.getDirPath();
-            }
+        Department deptTmp = departmentMapper.loadById(department.getParent().getId());
+        if(deptTmp != null){
+            dirPath = deptTmp.getDirPath();
         }
         dirPath += "/" + department.getId();
         department.setDirPath(dirPath);
@@ -85,24 +62,6 @@ public class DepartmentServiceIMpl implements IDepartmentService {
         departmentMapper.update(department);
     }
 
-    @Override
-    public PageList<Department> queryList(DepartmentQuery departmentQuery) {
-        List<Department> rows = departmentMapper.queryList(departmentQuery);
-        Integer total = departmentMapper.queryCount(departmentQuery);
-        return new PageList<>(total,rows);
-    }
-
-    @Override
-    public PageList<Department> queryList2(DepartmentQuery departmentQuery) {
-        List<Department> rows = departmentMapper2.queryList2(departmentQuery);
-        Integer total = departmentMapper2.queryCount2(departmentQuery);
-        return new PageList<>(total,rows);
-    }
-
-    @Override
-    public void patchDel(Long[] ids) {
-        departmentMapper.patchDel(ids);
-    }
 
     // 获取部门树数据
     /*@Override
@@ -126,7 +85,7 @@ public class DepartmentServiceIMpl implements IDepartmentService {
         return deptTree;
     }*/
 
-    @Override
+
     public List<Department> loadTree() {
         List<Department> departments = departmentMapper.loadAll();
 

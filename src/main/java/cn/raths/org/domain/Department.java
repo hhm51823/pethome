@@ -1,5 +1,6 @@
 package cn.raths.org.domain;
 
+import cn.raths.basic.domain.BaseDomain;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
@@ -7,9 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class Department {
-    /** 主键id */
-    private Long id;
+public class Department extends BaseDomain {
+
     /** 部门编号 */
     private String sn;
     /** 部门名称 */

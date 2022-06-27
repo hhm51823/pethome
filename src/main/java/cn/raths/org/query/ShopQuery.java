@@ -5,5 +5,5 @@ import lombok.Data;
 
 @Data
 public class ShopQuery extends BaseQuery {
-    private String keyword;
+
 }
