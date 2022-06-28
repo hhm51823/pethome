@@ -33,10 +33,26 @@ GIT分支
                 在审核时 使用网页版idea解决
 
     差异对比：
-        选中需要对比的文件或文件夹
+        在idea中，选中需要对比的文件或文件夹
         右键选择git->compare with Branch
         选择和那个分支比较
         如有不同则会展示所有不相同的列表
+
+Base抽取
+    domain： 公共属性的抽取
+    query：  公共的查询条件
+    mapper： 公共的基本接口的抽取，使用泛型。抽取后，mapper映射文件基本SQL的id，固定为公共mapper中定义的名称
+        根据功能需求如有特殊的需求，在自己的mapper中定义
+    service：公共的基本业务接口，使用泛型
+    service-impl 基本的service业务实现，使用泛型
+
+
+    使用：
+        domain 继承公共的domain + 编写非公共的属性
+        query  继承公共的query + 编写特有的查询字段
+        mapper 继承公共的mapper并指定泛型 + 编写特有的接口
+        service 继承公共的service并指定泛型 + 编写特有的业务接口
+        service-impl 继承公共的service-impl并指定泛型 + 实现自己的service接口
 
 
 
