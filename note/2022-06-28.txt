@@ -1,0 +1,180 @@
+NOSQL
+    泛指非关系型的数据库
+    关系型数据库在应付web2.0网站，特别是超大规模和高并发的交互类型的web2.0纯动态网站已经显得力不从心
+    非关系型数据库能较好的处理这类问题
+
+    Redis：非关系型数据库的代表，java三大中间件之一
+        严格来说：Redis是一种数据结构化存储方法的集合。
+        特点：
+            1，数据保存在内存，存取快，并发能力强
+            2，支持存储的value类型多：String，list，set，zset,hash...
+            3，提供了多种语言的客户端，使用方便
+            4，支持集群： 主从， 哨兵
+            5，订阅、发布
+            6，事务(假事务)
+
+        Redis使用：
+            1，下载，安装
+            2，启动服务器，在安装目录用cmd命令
+                redis-server.exe redis.window.conf
+            3，启动客户端
+                redis-client.exe -h 127.0.0.1 -p 6379
+            4，使用命令操作测试
+
+        Redis常用命令：
+            String：
+                set key value  保存一对键值对
+                get key        根据key获取value
+                mset key value key value  同时设置多组键值对
+                mget key key  同时通过多个key获取值
+                incr key 自增1 只能数字类型
+                decr key 自减1 只能数字类型
+                incrby key	number 加上指定的数值 只能数字类型
+                decrby key	number 减去指定的数值 只能数字类型
+                SETEX key seconds value 创建键值对并设置过期时间  seconds：设置时间
+                SETNX key value 设置一组键值对，key不存在则设置成功并返回1，否则不成功，返回0
+                GETSET key value  设置一个key-value，把这个key以前的值返回
+
+                keys *  查看所有key
+                del key 删除指定key
+                expire key secnods  设置过期时间
+                ttl key 查看过期时间
+                flushall 清空整个服务器的数据
+                flushdb  清空当前仓库
+                select index 切换仓库 默认有16个仓库
+                exists key  查询key是否存在
+                .
+                .
+                .
+
+            队列和栈：
+                队列：
+                    1，lpush key value value 存入
+                       rpop key  取出
+
+                    2，rpush key value value 存入
+                       lpop key  取出
+
+                栈：
+                    1，lpush key value value 存入
+                       lpop key  取出
+                    2，lpush key value value 存入
+                       rpop key  取出
+
+            java操作Redis：
+                Jedis相当于以前的JDBC
+                普通ssm项目
+                    1，导入jar包：commons-pool2-2.2.jar		#连接池
+                              jedis-2.5.2.jar			    #Jedis核心包
+                    2，启动Redis服务器
+                    3，编写测试类
+                        获取客户端
+                        Jedis jedis = new Jedis("127.0.0.1", 6379, 1 * 3000);
+                        设置键值对
+                        jedis.set("name", "张三");
+                        获取值
+                        String name = jedis.get("name");
+
+                连接池的使用：
+                     1，创建连接
+                     String host ="127.0.0.1";
+                     2，端口
+                     int port = 6379;
+                     3，超时时间,1秒超时
+                     int timeout = 1000;
+                     4，jedis客户端
+                     Jedis jedis = new Jedis(host,port,timeout);
+                     5，认证
+                     jedis.auth("123456");
+                     6，执行操作,保存值
+                     jedis.set("username","wang da cui");
+                     7，获取值
+                     String result = jedis.get("username");
+                     System.out.print(result);
+                     8，关闭连接
+                     jedis.close();
+
+
+                SpringBoot项目
+                    1，导入redis依赖
+                    2，在application.yml文件中编写相关配置
+                        spring:   // 注意：这一级，配置文件中已经存在了
+                          redis:
+                            database: 0
+                            host: 127.0.0.1
+                            port: 6379
+                            password: 123456
+                            jedis:
+                              pool:
+                                max-wait: 2000ms
+                                min-idle: 2
+                                max-idle: 8
+                    2，注入redis模板对象
+                        private RedisTemplate redisTemplate;
+                    3，选择设置类型并赋值
+                        redisTemplate.opsForValue().set("name", "佳佳");
+                    4，取值
+                        Object name = redisTemplate.opsForValue().get("name");
+
+                    注意，如果value是对象的话，需要将对象序列化
+                        序列化：domain类实现Serializable接口 ，
+                        建议用抽取的basedomain去实现Serializable接口
+
+        Redis数据持久化：
+            RDB：记录数据快照
+
+               优点：
+                   1.产生一个持久化文件，方便文件备份 ， 灾难恢复RDB是非常不错的选择
+                   2.Fork子进程去持久化， 性能比AOF好，文件体积更小，启动时恢复速度快
+               缺点：
+                  1.没办法100%保证数据不丢失，一旦宕机，未写入磁盘的数据就会丢失
+                  2.数据集大，FORk子进程持久化时会服务器卡顿
+
+
+            AOF: 记录写命令
+               优点：
+                 1.数据更安全
+                 2.采用Append，即使持久的时候宕机，也不影响已经持久的数据
+                 3.日志过大，可以rewrite重写
+                 4.AOF日志格式清晰，容易理解
+
+
+               缺点：
+                  1.AOF文件通常要大于RDB文件
+                  2.AOF数据恢复比RDB慢
+
+
+            最佳实践：二者结合 ，RDB来数据备份，迁移，容灾  。 AOF持久化保证数据不丢失。
+
+        Redis配置文件常用配置：
+            - bind 					# 指定的ip才能访问
+            - port					#默认端口
+            - timeout				#连接超时
+            - loglevel				#日志的级别
+            - logfile				#日志文件输出路径
+            - databases				#数据库数量
+            - save 900 1			#RDB持久方式，900 秒有一个数据修改进行持久化
+            - appendonely			#AOF持久方式
+
+        Redis淘汰策略
+            为了让有限的内存空间存储更多的有效数据
+            设置淘汰策略，让Redis自动淘汰那些老旧的，或者不怎么被使用的数据。
+
+            淘汰策略有哪些：
+                - volatile-lru ：从已设置过期时间的数据集（server.db[i].expires）中挑选最近最少使用的数据淘汰
+                - volatile-ttl：从已设置过期时间的数据集（server.db[i].expires）中挑选将要过期的数据淘汰
+                - allkeys-lru：从数据集（server.db[i].dict）中挑选最近最少使用的数据淘汰
+
+                - volatile-random：从已设置过期时间的数据集（server.db[i].expires）中任意选择数据淘汰
+                - allkeys-random：从数据集（server.db[i].dict）中任意选择数据淘汰
+                - no-enviction（驱逐）：禁止驱逐数据   （默认）
+
+            配置淘汰策略：
+                1，最大内存配置
+                    maxmemory <bytes>
+                    如：0.75G
+                    maxmemory 268435456
+                2，策略配置
+                    maxmemory-policy 策略名
+
+

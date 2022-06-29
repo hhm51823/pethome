@@ -2,16 +2,13 @@ package cn.raths.org.domain;
 
 import cn.raths.basic.domain.BaseDomain;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 @Data
-public class Shop extends BaseDomain {
+public class Shop extends BaseDomain{
 
 
     /** 店铺名称 */

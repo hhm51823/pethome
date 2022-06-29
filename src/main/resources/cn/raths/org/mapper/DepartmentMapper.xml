@@ -27,12 +27,16 @@
                         name=#{name},
                         dirPath=#{dirPath},
                         state=#{state},
-                        <if test="manager_id != null">
+                        <if test="manager.id == null">
                             manager_id=#{manager_id},
+                        </if>
+                        <if test="manager.id != null">
+                            manager_id=#{manager.id},
+                        </if>
+                        <if test="parent.id == null">
                             parent_id=#{parent_id}
                         </if>
-                        <if test="manager_id == null">
-                            manager_id=#{manager.id},
+                        <if test="parent.id != null">
                             parent_id=#{parent.id}
                         </if>
 
