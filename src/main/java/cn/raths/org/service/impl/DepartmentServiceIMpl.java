@@ -40,8 +40,14 @@ public class DepartmentServiceIMpl extends BaseServiceImpl<Department> implement
         if(!loadById.getDirPath().equals(department.getDirPath())){
             List<Department> depts = departmentMapper.loadAll();
             for (Department dept : depts) {
-                if (dept.getParent_id() == loadById.getId()) {
+               /* if (dept.getParent_id() == loadById.getId()) {
                     dept.setDirPath(dirPath + "/" + dept.getId());
+                    departmentMapper.update(dept);
+                }*/
+                if (dept.getDirPath().indexOf(loadById.getDirPath() + "/") >= 0){
+                    String newDirPath = dept.getDirPath().replace(loadById.getDirPath() + "/", dirPath + "/");
+                    System.out.println(dept.getDirPath());
+                    dept.setDirPath(newDirPath);
                     departmentMapper.update(dept);
                 }
             }
@@ -107,5 +113,19 @@ public class DepartmentServiceIMpl extends BaseServiceImpl<Department> implement
         }
 
         return deptTree;
+    }
+
+    @Override
+    public void remove(Long id) {
+        Department loadById = departmentMapper.loadById(id);
+        List<Department> depts = departmentMapper.loadAll();
+        for (Department dept : depts) {
+            if (dept.getParent_id() == loadById.getId()) {
+                dept.setDirPath(dept.getDirPath().replace("/" + dept.getParent_id() + "/","/"));
+                dept.setParent_id(loadById.getParent_id());
+                departmentMapper.update(dept);
+            }
+        }
+        departmentMapper.remove(id);
     }
 }

@@ -26,7 +26,7 @@ spring:
 #  别名和mapper映射文件位置
 mybatis:
   mapper-locations: classpath:cn/raths/*/mapper/*Mapper.xml
-  type-aliases-package: cn.raths.org.domain
+  type-aliases-package: cn.raths.org.domain,cn.raths.sys.domain
 
 # 日志
 logging:
