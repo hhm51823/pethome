@@ -19,17 +19,20 @@ public class Employee extends BaseDomain {
     // 年龄
     private Integer age;
     // 是否启用 1启用，0禁用
-    private Integer state;
+    private Integer state = 1;
     // 部门id
-    private Long department_id;
+    private Long departmentId;
     // 登录验证id
-    private Long logininfo_id;
+    private Long logininfoId;
     // 店铺id
-    private Long shop_id;
+    private Long shopId;
 
     // 所属部门
     private Department department;
 
     // 所属店铺
     private Shop shop;
+
+    // 第二次输入密码
+    private String comfirmPassword;
 }

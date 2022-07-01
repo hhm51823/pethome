@@ -19,9 +19,9 @@ public class Department extends BaseDomain {
     /** 状态 */
     private Integer state;
     /** 部门管理员 */
-    private Integer manager_id;
+    private Integer managerId;
     /** 上级部门id */
-    private Long parent_id;
+    private Long parentId;
 
     /** 经理 */
     private Employee manager;

@@ -105,10 +105,10 @@ public class DepartmentServiceIMpl extends BaseServiceImpl<Department> implement
         ArrayList<Department> deptTree = new ArrayList<>();
 
         for (Department dept : departments) {
-            if(dept.getParent_id() == null){
+            if(dept.getParentId() == null){
                 deptTree.add(dept);
             }else {
-                deptMap.get(dept.getParent_id()).getChildren().add(dept);
+                deptMap.get(dept.getParentId()).getChildren().add(dept);
             }
         }
 
@@ -120,9 +120,9 @@ public class DepartmentServiceIMpl extends BaseServiceImpl<Department> implement
         Department loadById = departmentMapper.loadById(id);
         List<Department> depts = departmentMapper.loadAll();
         for (Department dept : depts) {
-            if (dept.getParent_id() == loadById.getId()) {
-                dept.setDirPath(dept.getDirPath().replace("/" + dept.getParent_id() + "/","/"));
-                dept.setParent_id(loadById.getParent_id());
+            if (dept.getParentId() == loadById.getId()) {
+                dept.setDirPath(dept.getDirPath().replace("/" + dept.getParentId() + "/","/"));
+                dept.setParentId(loadById.getParentId());
                 departmentMapper.update(dept);
             }
         }

@@ -9,6 +9,8 @@ public class AjaxResult {
 
     private String message = "操作成功！";
 
+    private Object resultObj;
+
     public static AjaxResult getAjaxResult(){
         return new AjaxResult();
     }
@@ -24,6 +26,11 @@ public class AjaxResult {
 
     public AjaxResult setMessage(String message) {
         this.message = message;
+        return this;
+    }
+
+    public AjaxResult setResultObj(Object resultObj) {
+        this.resultObj = resultObj;
         return this;
     }
 }

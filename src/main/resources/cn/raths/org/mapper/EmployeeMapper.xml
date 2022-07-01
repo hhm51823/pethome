@@ -13,6 +13,11 @@
         select * from t_employee where id = #{id}
     </select>
 
+    <!--根据username查询-->
+    <select id="loadByUsername" resultType="Employee">
+        select * from t_employee where username = #{username}
+    </select>
+
     <!--根据id删除-->
     <delete id="remove">
         delete
@@ -31,12 +36,12 @@
                        age =#{age},
                        state =#{state},
                        department_id =#{department.id},
-                       logininfo_id =#{logininfo_id},
-                       shop_id =#{shop.id}
+                       logininfo_id =#{logininfoId},
+                       shop_id =#{shopId}
         where id = #{id}
     </update>
     <!--添加-->
-    <insert id="save">
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
         insert into t_employee (
                 username
                 ,phone
@@ -58,8 +63,8 @@
                 #{age},
                 #{state},
                 #{department.id},
-                #{logininfo_id},
-                #{shop.id}
+                #{logininfoId},
+                #{shopId}
                );
     </insert>
 
