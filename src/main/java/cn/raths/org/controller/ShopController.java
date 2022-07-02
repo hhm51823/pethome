@@ -1,6 +1,7 @@
 package cn.raths.org.controller;
 
 import cn.raths.basic.exception.BusinessException;
+import cn.raths.org.domain.ShopAuditLog;
 import cn.raths.org.service.IShopService;
 import cn.raths.org.domain.Shop;
 import cn.raths.org.query.ShopQuery;
@@ -88,6 +89,78 @@ public class ShopController {
     {
         try {
             shopService.settlement(shop);
+            return AjaxResult.getAjaxResult();
+        }catch (BusinessException e){
+            e.printStackTrace();
+            return AjaxResult.error().setMessage(e.getMessage());
+        }catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.error();
+        }
+    }
+
+    /**
+    * @Title: reject
+    * @Description: 驳回店铺入驻请求
+    * @Author: Lynn
+    * @Version: 1.0
+    * @Date:  2022/7/2 11:42
+    * @Parameters: [shop]
+    * @Return cn.raths.basic.utils.AjaxResult
+    */
+    @PostMapping("/audit/reject")
+    public AjaxResult reject(@RequestBody ShopAuditLog shopAuditLog)
+    {
+        try {
+            shopService.reject(shopAuditLog);
+            return AjaxResult.getAjaxResult();
+        }catch (BusinessException e){
+            e.printStackTrace();
+            return AjaxResult.error().setMessage(e.getMessage());
+        }catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.error();
+        }
+    }
+
+    /**
+    * @Title: pass
+    * @Description: 通过店铺入驻请求
+    * @Author: Lynn
+    * @Version: 1.0
+    * @Date:  2022/7/2 11:42
+    * @Parameters: [shop]
+    * @Return cn.raths.basic.utils.AjaxResult
+    */
+    @PostMapping("/audit/pass")
+    public AjaxResult pass(@RequestBody ShopAuditLog shopAuditLog)
+    {
+        try {
+            shopService.pass(shopAuditLog);
+            return AjaxResult.getAjaxResult();
+        }catch (BusinessException e){
+            e.printStackTrace();
+            return AjaxResult.error().setMessage(e.getMessage());
+        }catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.error();
+        }
+    }
+
+    /**
+    * @Title: prohibit
+    * @Description: 拒绝店铺入驻请求
+    * @Author: Lynn
+    * @Version: 1.0
+    * @Date:  2022/7/2 11:43
+    * @Parameters: [shop]
+    * @Return cn.raths.basic.utils.AjaxResult
+    */
+    @PostMapping("/audit/prohibit")
+    public AjaxResult prohibit(@RequestBody ShopAuditLog shopAuditLog)
+    {
+        try {
+            shopService.prohibit(shopAuditLog);
             return AjaxResult.getAjaxResult();
         }catch (BusinessException e){
             e.printStackTrace();

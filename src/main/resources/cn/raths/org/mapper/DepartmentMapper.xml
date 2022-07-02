@@ -28,13 +28,13 @@
                         dirPath=#{dirPath},
                         state=#{state},
                         <if test="manager == null">
-                            manager_id=#{manager_id},
+                            manager_id=#{managerId},
                         </if>
                         <if test="manager != null">
                             manager_id=#{manager.id},
                         </if>
                         <if test="parent == null">
-                            parent_id=#{parent_id}
+                            parent_id=#{parentId}
                         </if>
                         <if test="parent != null">
                             parent_id=#{parent.id}
@@ -68,8 +68,8 @@
         <result property="name" column="name"></result>
         <result property="dirPath" column="dirPath"></result>
         <result property="state" column="state"></result>
-        <result property="manager_id" column="manager_id"></result>
-        <result property="parent_id" column="parent_id"></result>
+        <result property="managerId" column="manager_id"></result>
+        <result property="parentId" column="parent_id"></result>
         <association property="manager" javaType="Employee">
             <id property="id" column="eId"></id>
             <result property="username" column="eName"></result>

@@ -77,9 +77,9 @@
         <result property="password" column="password"></result>
         <result property="age" column="age"></result>
         <result property="state" column="state"></result>
-        <result property="department_id" column="department_id"></result>
-        <result property="logininfo_id" column="logininfo_id"></result>
-        <result property="shop_id" column="shop_id"></result>
+        <result property="departmentId" column="department_id"></result>
+        <result property="logininfoId" column="logininfo_id"></result>
+        <result property="shopId" column="shop_id"></result>
         <association property="department" javaType="Department">
             <id property="id" column="dId"></id>
             <result property="name" column="dName"></result>
