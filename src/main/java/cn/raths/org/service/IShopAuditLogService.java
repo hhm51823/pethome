@@ -3,6 +3,8 @@ package cn.raths.org.service;
 import cn.raths.org.domain.ShopAuditLog;
 import cn.raths.basic.service.IBaseService;
 
+import java.util.List;
+
 /**
  * <p>
  *  服务类
@@ -13,4 +15,5 @@ import cn.raths.basic.service.IBaseService;
  */
 public interface IShopAuditLogService extends IBaseService<ShopAuditLog> {
 
+    List<ShopAuditLog> getByShopId(Long shopId);
 }

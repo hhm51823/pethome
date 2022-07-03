@@ -9,8 +9,11 @@ import cn.raths.basic.utils.AjaxResult;
 import cn.raths.basic.utils.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/shop")
@@ -57,7 +60,9 @@ public class ShopController {
     @GetMapping("/{id}")
     public Shop get(@PathVariable("id")Long id)
     {
-        return shopService.loadById(id);
+        Shop shop = shopService.loadById(id);
+
+        return shop;
     }
 
 
@@ -170,4 +175,38 @@ public class ShopController {
             return AjaxResult.error();
         }
     }
+
+    @GetMapping("/activation/{id}")
+    public String activation(@PathVariable("id")Long id)
+    {
+        return shopService.activation(id);
+    }
+
+    @GetMapping("/export/excel")
+    public void exportExcel(HttpServletResponse response)
+    {
+        shopService.exportExcel(response);
+    }
+
+    @PostMapping("/import/excel")
+    public AjaxResult importExcel(@RequestPart(value = "file", required = true)MultipartFile file)
+    {
+        try {
+            shopService.importExcel(file);
+            return AjaxResult.getAjaxResult();
+        }catch (BusinessException e){
+            e.printStackTrace();
+            return AjaxResult.error().setMessage(e.getMessage());
+        }catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.error();
+        }
+    }
+
+    @GetMapping("/echarts")
+    public Map<String,Object> echarts()
+    {
+        return shopService.echarts();
+    }
+
 }

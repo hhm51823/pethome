@@ -37,6 +37,13 @@
     <select id="loadAll" resultType="ShopAuditLog">
         select * from t_shop_audit_log
     </select>
+    <!--根据shopID加载所有对象-->
+    <select id="getByShopId" resultMap="BaseResultMap">
+        select l.*, e.id eId,e.username eUsername,s.id sId,s.name sName from t_shop_audit_log  l
+            left join t_shop s on l.shop_id = s.id
+            left join t_employee e on l.audit_id = e.id
+        where l.shop_id = #{shopId}
+    </select>
     <!--//查询总数=参数（查询对象），返回值：long-->
     <select id="queryCount" parameterType="ShopAuditLogQuery" resultType="int">
         select count(id) from t_shop_audit_log
@@ -67,11 +74,19 @@
     </delete>
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="cn.raths.org.domain.ShopAuditLog">
-    <result column="id" property="id" />
+        <id column="id" property="id" />
         <result column="shop_id" property="shopId" />
         <result column="audit_id" property="auditId" />
         <result column="audit_time" property="auditTime" />
         <result column="note" property="note" />
+        <association property="shop" javaType="Shop">
+            <id column="sId" property="id"></id>
+            <result column="sName" property="name"></result>
+        </association>
+        <association property="manager" javaType="Employee">
+            <id column="eId" property="id"></id>
+            <result column="eUsername" property="username"></result>
+        </association>
     </resultMap>
 
     <!-- 通用查询结果列 -->

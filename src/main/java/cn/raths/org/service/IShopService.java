@@ -3,8 +3,11 @@ package cn.raths.org.service;
 import cn.raths.org.domain.Shop;
 import cn.raths.basic.service.IBaseService;
 import cn.raths.org.domain.ShopAuditLog;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 /**
  * <p>
@@ -16,6 +19,8 @@ import javax.mail.MessagingException;
  */
 public interface IShopService extends IBaseService<Shop> {
 
+    Shop loadById(Long id);
+
     void settlement(Shop shop);
 
     void reject(ShopAuditLog shopAuditLog) throws MessagingException;
@@ -23,4 +28,12 @@ public interface IShopService extends IBaseService<Shop> {
     void pass(ShopAuditLog shopAuditLog) throws MessagingException;
 
     void prohibit(ShopAuditLog shopAuditLog) throws MessagingException;
+
+    String activation(Long id);
+
+    void exportExcel(HttpServletResponse response);
+
+    void importExcel(MultipartFile file);
+
+    Map<String, Object> echarts();
 }

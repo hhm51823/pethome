@@ -37,7 +37,7 @@ spring:
 #  别名和mapper映射文件位置
 mybatis:
   mapper-locations: classpath:cn/raths/*/mapper/*Mapper.xml
-  type-aliases-package: cn.raths.*.domain,cn.raths.*.query
+  type-aliases-package: cn.raths.*.domain,cn.raths.*.query,cn.raths.*.vo
   configuration:
     #开启驼峰命名
     map-underscore-to-camel-case: true

@@ -101,9 +101,50 @@ public class BaiduAuditUtils {
         return false;
     }
 
+    /**
+    * @Title: ImgCensor
+    * @Description: 图像审核
+    * @Author: Lynn
+    * @Version: 1.0
+    * @Date:  2022/7/3 8:20
+    * @Parameters: []
+    * @Return java.lang.String
+    */
+    public static String ImgCensor(String logo) {
+        // 请求url
+        String url = "https://aip.baidubce.com/rest/2.0/solution/v1/img_censor/v2/user_defined";
+        try {
+            if(logo == null){
+                return null;
+            }
+            String logo2 = logo.substring(1);
+            int i = logo2.indexOf("/");
+            String groupName = logo2.substring(0, i);
+            String fileName = logo2.substring(i + 1);
+            byte[] bytes = FastdfsUtil.download(groupName, fileName);
+            //byte[] imgData = FileUtil.readFileByBytes(filePath);
+            String imgStr = Base64Util.encode(bytes);
+            String imgParam = URLEncoder.encode(imgStr, "UTF-8");
+
+            String param = "image=" + imgParam;
+
+            // 注意这里仅为了简化编码每一次请求都去获取access_token，线上环境access_token有过期时间， 客户端可自行缓存，过期后重新获取。
+            String accessToken = getAuth();
+
+            String result = HttpUtil.post(url, accessToken, param);
+            System.out.println(result);
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static void main(String[] args) {
 //        String str = "fuck you";
 //        System.out.println(TextCensor(str));
+//        String logo = "/group1/M00/00/5C/CgAIC2K-w1uAJGNEAAIl5Q-U_lE309.jpg";
+//        System.out.println(ImgCensor(logo));
     }
 
 }

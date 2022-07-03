@@ -68,7 +68,6 @@ public class DepartmentServiceIMpl extends BaseServiceImpl<Department> implement
         }
         dirPath += "/" + department.getId();
         department.setDirPath(dirPath);
-        System.out.println(department);
         departmentMapper.update(department);
     }
 

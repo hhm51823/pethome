@@ -81,4 +81,10 @@ public class ShopAuditLogController {
     {
         return shopAuditLogService.queryList(query);
     }
+
+    @GetMapping("/shopId/{shopId}")
+    public List<ShopAuditLog> getByShopId(@PathVariable("shopId")Long shopId)
+    {
+        return shopAuditLogService.getByShopId(shopId);
+    }
 }

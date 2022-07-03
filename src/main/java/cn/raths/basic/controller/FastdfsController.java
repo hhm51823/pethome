@@ -1,6 +1,7 @@
 package cn.raths.basic.controller;
 
 import cn.raths.basic.utils.AjaxResult;
+import cn.raths.basic.utils.BaiduAuditUtils;
 import cn.raths.basic.utils.FastdfsUtil;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.web.bind.annotation.*;
@@ -30,9 +31,10 @@ public class FastdfsController {
     @DeleteMapping
     public AjaxResult delete(@RequestParam(value = "filePath", required = true) String filePath){
         try {
-            int i = filePath.indexOf("/");
-            String groupName = filePath.substring(0, i);
-            String fileName = filePath.substring(i + 1);
+            String newPath = filePath.substring(1);
+            int i = newPath.indexOf("/");
+            String groupName = newPath.substring(0, i);
+            String fileName = newPath.substring(i + 1);
             FastdfsUtil.delete(groupName,fileName);
             return AjaxResult.getAjaxResult();
         } catch (Exception e) {

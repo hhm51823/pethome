@@ -1,7 +1,9 @@
 package cn.raths.org.service.impl;
 
 import cn.raths.basic.exception.BusinessException;
+import cn.raths.basic.service.impl.BaseServiceImpl;
 import cn.raths.basic.utils.BaiduAuditUtils;
+import cn.raths.basic.utils.ExcelUtil;
 import cn.raths.basic.utils.MailUtil;
 import cn.raths.org.domain.Employee;
 import cn.raths.org.domain.Shop;
@@ -9,16 +11,19 @@ import cn.raths.org.domain.ShopAuditLog;
 import cn.raths.org.mapper.EmployeeMapper;
 import cn.raths.org.mapper.ShopAuditLogMapper;
 import cn.raths.org.mapper.ShopMapper;
-import cn.raths.org.service.IEmployeeService;
 import cn.raths.org.service.IShopService;
-import cn.raths.basic.service.impl.BaseServiceImpl;
+import cn.raths.org.vo.ShopVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
-import javax.security.auth.Subject;
+import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -54,6 +59,7 @@ public class ShopServiceImpl extends BaseServiceImpl<Shop> implements IShopServi
         if(!BaiduAuditUtils.TextCensor(shop.getName())){
             throw new BusinessException("店铺名包含违规信息,请重新输入");
         }
+
         if(StringUtils.isEmpty(shop.getTel())){
             throw new BusinessException("电话不能为空,请重新输入");
         }
@@ -94,7 +100,7 @@ public class ShopServiceImpl extends BaseServiceImpl<Shop> implements IShopServi
         }
         // 店铺是否存在
         Shop loadByName = shopMapper.loadByName(shop.getName());
-        if (loadByName != null){
+        if (loadByName != null && shop.getId() == null){
             throw new BusinessException("店铺已入驻,请重新输入");
         }
 
@@ -104,7 +110,11 @@ public class ShopServiceImpl extends BaseServiceImpl<Shop> implements IShopServi
             employeeMapper.save(admin);
         }
         shop.setAdminId(loadByUsername.getId());
-        shopMapper.save(shop);
+        if (shop.getId() == null) {
+            shopMapper.save(shop);
+        }else {
+            shopMapper.update(shop);
+        }
         loadByUsername.setShopId(shop.getId());
         employeeMapper.update(loadByUsername);
     }
@@ -155,5 +165,58 @@ public class ShopServiceImpl extends BaseServiceImpl<Shop> implements IShopServi
         String subject = "店铺入驻请求被拒绝";
         String contnet = shopAuditLog.getNote();
         MailUtil.sendSimpleMail(to, subject, contnet);
+    }
+
+    @Override
+    public String activation(Long id) {
+        Shop shop = shopMapper.loadById(id);
+        shop.setState(1);
+        shopMapper.update(shop);
+        return "激活成功";
+    }
+
+    @Override
+    public void exportExcel(HttpServletResponse response) {
+        List<Shop> shops = shopMapper.loadAll();
+        ExcelUtil.exportExcel(shops, null, "店铺信息", Shop.class, "店铺信息.xlsx", response);
+
+    }
+
+    @Override
+    public void importExcel(MultipartFile file) {
+        List<Shop> shops = ExcelUtil.importExcel(file, 0, 1, Shop.class);
+        shopMapper.batchSave(shops);
+    }
+
+    /**
+    * @Title: echarts
+    * @Description: 数据统计
+    * @Author: Lynn
+    * @Version: 1.0
+    * @Date:  2022/7/2 20:54
+    * @Parameters: []
+    * @Return java.util.Map<java.lang.String,java.lang.Object>
+    */
+    @Override
+    public Map<String, Object> echarts() {
+        List<ShopVo> shopVos = shopMapper.echarts();
+        List<String> x = shopVos.stream().map(ShopVo::getState)
+                .map(a -> a == 0 ? "待激活" : a == 1 ? "已审核" : a == 2 ? "待激活" : a == -1 ? "驳回" : "拒绝")
+                .collect(Collectors.toList());
+        List<Integer> y = shopVos.stream().map(ShopVo::getCount).collect(Collectors.toList());
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("x", x);
+        map.put("y", y);
+        return map;
+    }
+
+    @Override
+    public Shop loadById(Long id){
+        Shop shop = shopMapper.loadById(id);
+        if(shop.getAdminId() != null){
+            Employee employee = employeeMapper.loadById(shop.getAdminId());
+            shop.setAdmin(employee);
+        }
+        return shop;
     }
 }
