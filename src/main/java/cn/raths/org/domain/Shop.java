@@ -3,6 +3,7 @@ package cn.raths.org.domain;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
 import cn.afterturn.easypoi.excel.annotation.Excel;
 import cn.raths.basic.domain.BaseDomain;

@@ -201,7 +201,7 @@ public class ShopServiceImpl extends BaseServiceImpl<Shop> implements IShopServi
     public Map<String, Object> echarts() {
         List<ShopVo> shopVos = shopMapper.echarts();
         List<String> x = shopVos.stream().map(ShopVo::getState)
-                .map(a -> a == 0 ? "待激活" : a == 1 ? "已审核" : a == 2 ? "待激活" : a == -1 ? "驳回" : "拒绝")
+                .map(a -> a == 0 ? "待审核" : a == 1 ? "已审核" : a == 2 ? "待激活" : a == -1 ? "驳回" : "拒绝")
                 .collect(Collectors.toList());
         List<Integer> y = shopVos.stream().map(ShopVo::getCount).collect(Collectors.toList());
         HashMap<String, Object> map = new HashMap<>();

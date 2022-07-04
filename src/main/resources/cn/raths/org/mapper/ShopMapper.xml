@@ -81,13 +81,15 @@
     </select>
     <!--//查询总数=参数（查询对象），返回值：long-->
     <select id="queryCount" parameterType="ShopQuery" resultType="int">
-        select count(id) from t_shop
+        select count(s.id) from t_shop s
         <include refid="whereSql"/>
     </select>
     <!--//查询当前页数据=参数（查询对象），返回值:List-->
 <!--  s left join t_employee e on s.admin_id = e.id  -->
     <select id="queryList" parameterType="ShopQuery" resultMap="BaseResultMap">
-        select s.*, e.id eId, e.username eUsername from t_shop s left join t_employee e on s.admin_id = e.id
+        select s.*, e.id eId, e.username eUsername
+               from t_shop s
+            left join t_employee e on s.admin_id = e.id
         <include refid="whereSql"/>
         limit #{begin},#{pageSize}
     </select>
@@ -96,7 +98,7 @@
     <sql id="whereSql">
         <where>
             <if test="keyword!=null and keyword!=''">
-                and (name like concat('%',#{keyword},'%'))
+                and (s.name like concat('%',#{keyword},'%'))
             </if>
         </where>
     </sql>
