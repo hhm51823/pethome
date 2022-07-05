@@ -1,6 +1,6 @@
 package cn.raths.basic.utils;
 
-import cn.itsource.hrm.exception.GlobalException;
+import cn.raths.basic.exception.BusinessException;
 import sun.misc.BASE64Encoder;
  
 import javax.imageio.ImageIO;
@@ -216,7 +216,7 @@ public class VerifyCodeUtils {
             return encoder.encode(data.toByteArray());
         } catch (IOException e) {
             e.printStackTrace();
-            throw new GlobalException("生成验证码失败！");
+            throw new BusinessException("生成验证码失败！");
         }
     }
 

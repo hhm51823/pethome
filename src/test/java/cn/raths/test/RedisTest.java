@@ -12,9 +12,8 @@ public class RedisTest extends BaseTest {
 
     @Test
     public void test() throws Exception{
-       redisTemplate.opsForValue().set("name", "佳佳");
 
-        Object name = redisTemplate.opsForValue().get("name");
+        Object name = redisTemplate.opsForValue().get("c6673dff-47b3-4526-b003-842a6368b043");
         System.out.println(name);
     }
 
