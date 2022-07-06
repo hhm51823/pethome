@@ -17,6 +17,14 @@
     <select id="loadByUsername" resultType="Employee">
         select * from t_employee where username = #{username}
     </select>
+    <!--根据Eamil查询-->
+    <select id="loadByEmail" resultType="Employee">
+        select * from t_employee where email = #{email}
+    </select>
+    <!--根据phone查询-->
+    <select id="loadByPhone" resultType="Employee">
+        select * from t_employee where phone = #{phone}
+    </select>
 
     <!--根据id删除-->
     <delete id="remove">

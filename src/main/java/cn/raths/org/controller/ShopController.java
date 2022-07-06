@@ -88,7 +88,15 @@ public class ShopController {
         return shopService.queryList(query);
     }
 
-
+    /**
+    * @Title: settlement
+    * @Description: 店铺入驻
+    * @Author: Lynn
+    * @Version: 1.0
+    * @Date:  2022/7/6 18:18
+    * @Parameters: [shop]
+    * @Return cn.raths.basic.utils.AjaxResult
+    */
     @PostMapping("/settlement")
     public AjaxResult settlement(@RequestBody Shop shop)
     {

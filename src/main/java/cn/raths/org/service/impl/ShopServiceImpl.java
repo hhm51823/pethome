@@ -46,7 +46,15 @@ public class ShopServiceImpl extends BaseServiceImpl<Shop> implements IShopServi
     private ShopAuditLogMapper shopAuditLogMapper;
 
 
-
+    /**
+    * @Title: settlement
+    * @Description: 店铺入驻
+    * @Author: Lynn
+    * @Version: 1.0
+    * @Date:  2022/7/6 18:17
+    * @Parameters: [shop]
+    * @Return void
+    */
     @Override
     public void settlement(Shop shop) {
 

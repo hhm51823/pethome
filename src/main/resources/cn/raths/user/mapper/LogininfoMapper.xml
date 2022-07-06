@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.raths.user.mapper.LogininfoMapper">
+    <!--保存对象-->
+    <insert id="save" parameterType="Logininfo" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into t_logininfo(
+                            username,
+                            phone,
+                            email,
+                            salt,
+                            password,
+                            type,
+                            disable
+        ) values(
+                #{username},
+                #{phone},
+                #{email},
+                #{salt},
+                #{password},
+                #{type},
+                #{disable}        )
+    </insert>
+    <!--删除对象-->
+    <delete id="remove" parameterType="long">
+        delete from t_logininfo where id = #{id}
+    </delete>
+
+    <!--更新对象-->
+    <update id="update" parameterType="Logininfo">
+        update t_logininfo
+        set
+
+                            username = #{username},
+                            phone = #{phone},
+                            email = #{email},
+                            salt = #{salt},
+                            password = #{password},
+                            type = #{type},
+                            disable = #{disable}        where id = #{id}
+    </update>
+    <!--加载对象-->
+    <select id="loadById" resultType="Logininfo" parameterType="long">
+        select * from t_logininfo where id = #{id}
+    </select>
+    <!--加载所有对象-->
+    <select id="loadAll" resultType="Logininfo">
+        select * from t_logininfo
+    </select>
+    <!--//查询总数=参数（查询对象），返回值：long-->
+    <select id="queryCount" parameterType="LogininfoQuery" resultType="int">
+        select count(id) from t_logininfo
+        <include refid="whereSql"/>
+    </select>
+    <!--//查询当前页数据=参数（查询对象），返回值:List-->
+    <select id="queryList" parameterType="LogininfoQuery" resultType="Logininfo">
+        select * from t_logininfo
+        <include refid="whereSql"/>
+        limit #{start},#{pageSize}
+    </select>
+
+
+    <sql id="whereSql">
+        <where>
+            <if test="keyword!=null and keyword!=''">
+                and (name like concat('%',#{keyword},'%'))
+            </if>
+        </where>
+    </sql>
+
+    <!--//批量删除-->
+    <delete id="patchDel" parameterType="arraylist">
+        delete from t_logininfo where id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.raths.user.domain.Logininfo">
+    <result column="id" property="id" />
+        <result column="username" property="username" />
+        <result column="phone" property="phone" />
+        <result column="email" property="email" />
+        <result column="salt" property="salt" />
+        <result column="password" property="password" />
+        <result column="type" property="type" />
+        <result column="disable" property="disable" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+id,
+        username, phone, email, salt, password, type, disable
+    </sql>
+
+</mapper>
