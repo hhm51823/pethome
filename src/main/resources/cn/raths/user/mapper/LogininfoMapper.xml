@@ -42,6 +42,23 @@
     <select id="loadById" resultType="Logininfo" parameterType="long">
         select * from t_logininfo where id = #{id}
     </select>
+
+
+    <!--根据登录账号查询对象-->
+    <select id="loadByAccount" resultType="Logininfo">
+        select * from t_logininfo
+            where username = #{account} or phone = #{account} or email = #{account}
+            and type = #{type}
+    </select>
+
+ <!--根据登录账号查询对象-->
+    <select id="loadByPhone" resultType="Logininfo">
+        select * from t_logininfo
+            where phone = #{phone}
+            and type = #{type}
+    </select>
+
+
     <!--加载所有对象-->
     <select id="loadAll" resultType="Logininfo">
         select * from t_logininfo

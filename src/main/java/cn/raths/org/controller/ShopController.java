@@ -1,5 +1,6 @@
 package cn.raths.org.controller;
 
+import cn.raths.basic.dto.ShopRegisterDto;
 import cn.raths.basic.exception.BusinessException;
 import cn.raths.org.domain.ShopAuditLog;
 import cn.raths.org.service.IShopService;
@@ -98,10 +99,10 @@ public class ShopController {
     * @Return cn.raths.basic.utils.AjaxResult
     */
     @PostMapping("/settlement")
-    public AjaxResult settlement(@RequestBody Shop shop)
+    public AjaxResult settlement(@RequestBody ShopRegisterDto shopRegisterDto)
     {
         try {
-            shopService.settlement(shop);
+            shopService.settlement(shopRegisterDto);
             return AjaxResult.getAjaxResult();
         }catch (BusinessException e){
             e.printStackTrace();
@@ -184,6 +185,15 @@ public class ShopController {
         }
     }
 
+    /**
+    * @Title: activation
+    * @Description: 激活店铺接口
+    * @Author: Lynn
+    * @Version: 1.0
+    * @Date:  2022/7/7 17:07
+    * @Parameters: [id]
+    * @Return java.lang.String
+    */
     @GetMapping("/activation/{id}")
     public String activation(@PathVariable("id")Long id)
     {

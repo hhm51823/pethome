@@ -1,10 +1,10 @@
 package cn.raths.org.service.impl;
 
+import cn.raths.basic.constant.BaseConstants;
+import cn.raths.basic.dto.ShopRegisterDto;
 import cn.raths.basic.exception.BusinessException;
 import cn.raths.basic.service.impl.BaseServiceImpl;
-import cn.raths.basic.utils.BaiduAuditUtils;
-import cn.raths.basic.utils.ExcelUtil;
-import cn.raths.basic.utils.MailUtil;
+import cn.raths.basic.utils.*;
 import cn.raths.org.domain.Employee;
 import cn.raths.org.domain.Shop;
 import cn.raths.org.domain.ShopAuditLog;
@@ -13,7 +13,12 @@ import cn.raths.org.mapper.ShopAuditLogMapper;
 import cn.raths.org.mapper.ShopMapper;
 import cn.raths.org.service.IShopService;
 import cn.raths.org.vo.ShopVo;
+import cn.raths.user.domain.Logininfo;
+import cn.raths.user.domain.User;
+import cn.raths.user.mapper.LogininfoMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,6 +48,12 @@ public class ShopServiceImpl extends BaseServiceImpl<Shop> implements IShopServi
     private EmployeeMapper employeeMapper;
 
     @Autowired
+    private LogininfoMapper logininfoMapper;
+
+     @Autowired
+    private RedisTemplate redisTemplate;
+
+    @Autowired
     private ShopAuditLogMapper shopAuditLogMapper;
 
 
@@ -56,10 +67,38 @@ public class ShopServiceImpl extends BaseServiceImpl<Shop> implements IShopServi
     * @Return void
     */
     @Override
-    public void settlement(Shop shop) {
-
+    public void settlement(ShopRegisterDto shopRegisterDto) {
+        Shop shop = shopRegisterDto.getShop();
         Employee admin = shop.getAdmin();
+        String phoneCode = shopRegisterDto.getPhoneCode();
+        String emailCode = shopRegisterDto.getEmailCode();
 
+        if(StringUtils.isEmpty(emailCode)){
+            throw new BusinessException("请输入邮箱验证码");
+        }
+        if(StringUtils.isEmpty(phoneCode)){
+            throw new BusinessException("请输入手机验证码");
+        }
+        // 判断验证码是否正确
+        // 根据业务键加电话从redis中获取值并判断是否存在
+        // 拼接email验证码的key
+        String emailCodeKey = BaseConstants.VerifyCodeConstant.BUSINESS_REGISTER_PREFIX + shop.getAdmin().getEmail();
+        Object emailCodeTmp = redisTemplate.opsForValue().get(emailCodeKey);
+        if(emailCodeTmp == null){
+            throw new BusinessException("邮箱验证码已过期");
+        }
+        if(!emailCode.equals(emailCodeTmp.toString().split(":")[1])){
+            throw new BusinessException("邮箱验证码错误");
+        }
+        // 拼接phone验证码的key
+        String phoneCodeKey = BaseConstants.VerifyCodeConstant.BUSINESS_REGISTER_PREFIX + shop.getAdmin().getPhone();
+        Object phoneCodeTmp = redisTemplate.opsForValue().get(phoneCodeKey);
+        if(phoneCodeTmp == null){
+            throw new BusinessException("手机验证码已过期");
+        }
+        if(!emailCode.equals(emailCodeTmp.toString().split(":")[1])){
+            throw new BusinessException("手机验证码错误");
+        }
         // 1判断参数是否为空
         if(StringUtils.isEmpty(shop.getName())){
             throw new BusinessException("店铺名不能为空,请重新输入");
@@ -91,7 +130,7 @@ public class ShopServiceImpl extends BaseServiceImpl<Shop> implements IShopServi
             throw new BusinessException("管理员密码不能为空,请重新输入");
         }
         if(StringUtils.isEmpty(admin.getComfirmPassword())){
-            throw new BusinessException("管理员确认密码不能为空,请重新输入");
+            throw new BusinessException("管理员密码确认不能为空,请重新输入");
         }
         // 2, 两次密码是否一次
         if (!admin.getPassword().equals(admin.getComfirmPassword())){
@@ -114,17 +153,44 @@ public class ShopServiceImpl extends BaseServiceImpl<Shop> implements IShopServi
 
         // 分别给员工和店铺添加shopid字段和adminid字段
         if (loadByUsername == null){
-            loadByUsername = admin;
+            adminInit(admin);
             employeeMapper.save(admin);
+            Logininfo logininfo = admin2Logininfo(admin);
+            logininfoMapper.save(logininfo);
+            admin.setLogininfoId(logininfo.getId());
+            employeeMapper.update(admin);
+            loadByUsername = admin;
         }
         shop.setAdminId(loadByUsername.getId());
-        if (shop.getId() == null) {
-            shopMapper.save(shop);
-        }else {
-            shopMapper.update(shop);
-        }
+        shopMapper.save(shop);
+
         loadByUsername.setShopId(shop.getId());
         employeeMapper.update(loadByUsername);
+    }
+
+    private void adminInit(Employee admin) {
+        // 生成盐值
+        String salt = StrUtils.getComplexRandomString(32);
+        admin.setSalt(salt);
+        // 根据MD5生成加密后的密码
+        String saltPassword = MD5Utils.encrypByMd5(salt + admin.getPassword());
+        admin.setPassword(saltPassword);
+    }
+
+    /**
+     * @Title: admin2Logininfo
+     * @Description: 根据user对象初始化logininfo对象
+     * @Author: Lynn
+     * @Version: 1.0
+     * @Date:  2022/7/6 15:31
+     * @Parameters: [user]
+     * @Return cn.raths.user.domain.Logininfo
+     */
+    private Logininfo admin2Logininfo(Employee admin) {
+        Logininfo logininfo = new Logininfo();
+        BeanUtils.copyProperties(admin, logininfo);
+        logininfo.setType(0);
+        return logininfo;
     }
 
     @Override

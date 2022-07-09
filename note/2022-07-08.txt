@@ -1,0 +1,165 @@
+
+登录业务实现：
+    登录需求分析：
+        后台：账号密码登录，账号可以是username，phone，email中任意一个。密码唯一
+
+        前台：
+            1，账号密码登录，账号可以是username，phone，email中任意一个。密码唯一
+            2，手机短信(邮箱)验证码登录
+            3，第三方登录：QQ，微信，微博等
+
+        前后台的基础登录是同一个接口，设计的logininfo表就是为了实现前后台登录只需一个接口
+        登录时只需查询logininfo表即可，因为user、employee所有的增删改都会同步到logininfo表中
+
+    登录方案分析：
+        1，有状态登录方案：基于session做的登录，这种登录方案叫做有状态登录方案
+            因为HTTP协议是无状态的，而session可以解决这个问题，所以基于session的登录方案叫做有状态登录方案
+
+            缺点：
+                1，不支持app系统，因为app没有session
+                2，前后端分离项目无法实现：因为session是基于cookie的，浏览器在发送请求时会自动传递一个JSessionId，后端根据JSessionId获取到session中的数据，
+                    *.前后端分离项目中无法实现，因为浏览器是把JSessionId带给前端项目，无法自动传递到后端
+                    *.客户请求是直接请求前端项目，在页面中触发一些事件才会访问后端接口
+
+        2，Nginx代理方案，不支持app系统
+
+        3，无状态token登录方案（当前使用的方案）
+            1，后端校验登录成功之后生成UUID作为token，存入到Redis中，并设置有效期为30分钟
+              - Key：token
+              - Value：用户信息
+
+            2，登录成功之后将生成的token返回给前端，前端设置到localStorage浏览器缓存中，
+                每次请求将token放入到请求头中进行接口访问，从而实现无状态token登录方案
+
+
+    后台登录实现步骤：
+        前端：
+            1，修改login.vue中对应表单字段和校验规则
+                在模型层的表单对象中增加type字段，并设置为0（表示是管理员）
+            2，登录绑定单击事件，并发送Axios请求将表单对象传递给后端
+            3，根据后端响应做出响应
+                1，登录成功跳转首页
+                2，失败展示提示信息
+
+        后端：
+            1，编写临时对象，用于接收前端传递的登录表单对象
+            2，编写公共的登录接口，接收前端的对象
+                1，如果登录成功，需要将token和用户的一些信息返回给前端
+                2，登录失败则只返回提示信息
+            3，在实现类中
+                1，参数非空校验
+                2，根据账号和type在logininfo中查询是否存在该对象
+
+                    注意：账号可以是username，phone，email中任意一个，在SQL中用or达成这一需求
+                        mapper中传递多个参数使用@param注解设置参数名后，才能在SQL中使用设置的参数名拿到值
+
+                3，根据查询的对象的盐值拼接前端传回的密码用MD5加密，再与数据库中查到的密码对比
+                4，如果都满足
+                    1，使用UUID生成唯一id作为token
+                    2，将查询到的logininfo作为value存入redis中
+
+                        注意：redis保存对象需要将logininfo对象序列化，因为存入Redis中的对象需要实现序列化才能存入内存中
+                            logininfo类实现序列化接口Serializable即可.我们公共的domain已经实现了该接口，所以无需再次实现
+
+
+                    3，将logininfo的敏感信息置为空后保存到map中
+                    4，将token也保存到map中
+                    5，返回map
+
+
+    拦截器（按执行顺序）：
+        路由拦截器：
+            前端页面也不是随意可以让用户访问的，只有登录了的用户才可以访问非登录页面，没有登录的用户只能访问登录、注册页面
+            避免暴露项目结构，以及项目资源
+            1，设定放行路由路径
+                如果是登录或者注册页面则清空浏览器localStorage中的token和logininfo
+            2，查询浏览器localStorage中的token或logininfo
+                1，存在则放行
+                2，不存在则跳转到登录路由页面
+
+        前置拦截器：
+            在Axios请求发送前，在请求头中添加token
+            让我们的请求携带token，以证明用户已登录，如果缓存中不存在token，那么请求就没有携带token，后端拦截即可，前端不用再单独处理
+            1，从浏览器localStorage中拿到token
+            2，将token放入请求头中
+
+        后台拦截器：
+            防止用户未登录就访问后端接口
+            1，实现HandlerInterceptor接口覆写preHandle方法
+                1，从请求头中获取token并判断是否存在
+                    1，不存在则拦截，通过响应对象获取打印流，向前台返回一个json格式的数据，
+                        设置响应参数类型为JSON
+                        response.setContentType("application/json;charset=UTF-8");
+                        writer.write("{"success":false,"massage":"noLogin\"}");
+                        表示该用户未登录，或登录已过期
+                    2，存在则继续
+                2，根据token去redis中获取logininfo，判断是否存在
+                    1，不存在则同上返回json表示未登录或已过期
+                    2，存在则将token和logininfo从新设置有效期为30分钟
+            2，创建配置类，配置拦截器
+                1，在类上加上注解：@Configuration
+                2，实现WebMvcConfigurer接口
+                3，覆写addInterceptors方法
+                4，registry.addInterceptor(loginInterceptor) // 添加拦截器
+                5，.addPathPatterns("/**") // 拦截路径
+                6，.excludePathPatterns("/login/**","多个放行路径....","..."...) // 放行路径
+
+        后置拦截器：
+            在请发发出后端响应后，进入到回调函数前执行
+            获取这两个值success=false&resultObj="noLogin"，如果是此字段值说明拦截器拦截到未登录，
+            那么后置拦截器跳转到登录页面，反之说明已经登录了直接放行
+
+    拦截器执行流程：
+        有以下几种情况
+        1，用户正常登录页面账号或密码错误
+            只会执行前置拦截器和后置拦截器，因为登录接口和登录路由都是放行了的。
+            只要发送了Axios请求就会执行前置拦截器和后置拦截器
+        2，登录页面账号密码正确
+            1，先执行一次前置拦截器和后置拦截器
+
+            2，因为登录成功会跳转到首页，且首页会有数据报告的请求所以
+                1，路由拦截器
+                2，前置拦截器
+                3，后台拦截器
+                4，后置拦截器
+        3，用户直接访问项目其他受保护的页面
+            只会进路由拦截器。
+
+    首页用户信息回显：
+        1，在模型层添加用于信息展示的字段
+        2，在视图层对应位置展示模型层的字段
+        3，在首页钩子函数中获取浏览器localStorage中的logininfo，并将用来展示的字段赋值给模型层的展示字段
+            用户名根据logininfo中的username，phone，email中的任意信息展示
+
+
+前端基础登录实现：
+    前端：
+        1，引入vue，Axios和公共的common.js，基本的页面信息修改
+        2，给登录表单设置唯一id作为vue挂载节点，双向绑定登录表单字段
+        3，创建vue，设置挂载节点，添加登录表单字段
+        4，登录按钮绑定单击事件
+            1，发送Axios请求
+            2，根据响应将token和logininfo存入浏览器的localStorage中并跳转首页
+                location.href = "index.html";
+                注意：需要將logininfo转换成JSON字符串进行存储，因为localStorage不能存储对象
+
+    后端：
+        什么都不用做
+
+    拦截器：
+        在公共的common.js中配置
+        前置和后置拦截器和后台的基本无异
+        只是跳转页面需要使用：location.href = "页面地址";
+
+        静态项目没有路由，我们无法使用路由进行页面拦截，但是我们也可以通过判断用户请求的路径进行拦截
+        1，获取访问路径
+            使用indexOf方法判断路径中是否含有我们要放行的页面名
+            indexOf返回值不等于-1就是包含放行的页面，则放行
+            indexOf返回值等于-1则判断用户是否登录
+                1，去浏览器的localStorage中查询token和logininfo是否存在
+                2，存在则表示已经登录过了，执行放行
+                3，反之则跳转到登录页面并将浏览器的localStorage中的token和logininfo删除
+
+
+
+

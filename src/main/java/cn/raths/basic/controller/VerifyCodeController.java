@@ -1,6 +1,7 @@
 package cn.raths.basic.controller;
 
 import cn.raths.basic.dto.EmailRegisterDto;
+import cn.raths.basic.dto.PhoneCodeLoginDto;
 import cn.raths.basic.dto.RegisterDto;
 import cn.raths.basic.exception.BusinessException;
 import cn.raths.basic.service.IVerifyCodeService;
@@ -29,11 +30,10 @@ public class VerifyCodeController {
             return AjaxResult.error();
         }
     }
-    //smsCode
 
     /**
     * @Title: smsCode
-    * @Description: 发送短信验证码的方法
+    * @Description: 发送短信验证码注册的方法
     * @Author: Lynn
     * @Version: 1.0
     * @Date:  2022/7/6 16:11
@@ -60,6 +60,22 @@ public class VerifyCodeController {
     {
         try {
             verifyCodeService.emailCode(emailRegisterDto);
+            return AjaxResult.getAjaxResult();
+        }catch (BusinessException e){
+            e.printStackTrace();
+            return AjaxResult.error().setMessage(e.getMessage());
+        }catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.error();
+        }
+    }
+
+
+    @PostMapping ("/smsLoginCode")
+    public AjaxResult smsLoginCode(@RequestBody PhoneCodeLoginDto phoneCodeLoginDto)
+    {
+        try {
+            verifyCodeService.smsLoginCode(phoneCodeLoginDto);
             return AjaxResult.getAjaxResult();
         }catch (BusinessException e){
             e.printStackTrace();

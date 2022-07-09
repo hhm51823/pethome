@@ -1,5 +1,6 @@
 package cn.raths.org.service;
 
+import cn.raths.basic.dto.ShopRegisterDto;
 import cn.raths.org.domain.Shop;
 import cn.raths.basic.service.IBaseService;
 import cn.raths.org.domain.ShopAuditLog;
@@ -21,7 +22,7 @@ public interface IShopService extends IBaseService<Shop> {
 
     Shop loadById(Long id);
 
-    void settlement(Shop shop);
+    void settlement(ShopRegisterDto shopRegisterDto);
 
     void reject(ShopAuditLog shopAuditLog) throws MessagingException;
 
