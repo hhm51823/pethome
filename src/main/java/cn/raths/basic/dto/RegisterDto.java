@@ -17,6 +17,10 @@ public class RegisterDto {
     private String password;
     // 第二次输入的密码
     private String passwordRepeat;
-
+    // 用户1，  管理员0
     private Integer type;
+
+    // 判断是什么业务
+    private String business;
+
 }

@@ -1,0 +1,108 @@
+
+OAuth2.0
+    第三方扫码登录协议
+        授权码模式-authorization code：四种授权中授权码方式是最为复杂，但也是安全系数最高的，比较常用的一种方式
+        简化模式-implicit ：针对纯前端应用，没有后端时就无法申请授权码，那么前端直接发起请求要求第三方直接返回令牌
+        密码模式-resource owner password credentials：用户输入第三方平台的账号密码，根据账号密码获取令牌
+        客户端模式-client credentials：与密码模式比较相识，但是是通过凭证去获取令牌
+
+        授权码模式：
+            1，用户微信扫码登录客户端，客服端请求微信方授权
+            2，微信开放平台请求用户授权
+            3，用户同意后，通过提前设定的回调域将code返回给客户端
+            4，客户端携带code请求微信方获取access_token和openId
+            5，客户端携带access_token和openId请求微信方 获取用户的基本信息
+
+第三方登录之微信登录：
+    微信登录大概流程：是基于OAuth2授权码模式，大概可以分为三步
+        1，客户端请求微信方，微信方拉起浏览器展示微信登录二维码，客户扫码同意后，
+            微信方将code通过提前设置的回调作用域返回给我们
+        2，客户端携带code请求微信方API获取access_token和openId
+        3，客户端携带access_token和openId请求微信方API 获取用户的基本信息
+
+    微信登录详细实现流程
+        1，获取code：
+            前端：
+                0，根据微信开放平台提供的开发指南拼接好获取code的URL地址(注意回调作用域真实有效)
+                1，给微信登录标签href绑定提前拼接好的获取code的URL
+                2，准备一个callback.html回调作用域页面
+                3，在common.js中的请求路径拦截器放行callback.html和binder.Html(绑定手机号，提前设置)页面
+                4，在common.js中准备一个从请求地址中截取参数的函数
+                5，在callback.html的钩子函数中通过截取参数的函数获取code
+                    携带code发起Axios请求
+            后端：第一步和后端没有关系
+        2，获取access_token和openId
+            后端：
+                1，编写微信登录接口接收code
+                2，根据微信开放平台提供的开发指南拼接code到获取access_token的URL中
+                3，准备一个发get请求的方法(获取access_token 和 用户基本信息都是get请求)
+                4，发送请求得到一个json字符串，将其转换为JSONObject对象
+                5，通过getString获取access_token 和 openid
+                6，根据openid查询t_wxuser表得到一个wxuser对象
+                7，判断wxuser对象是否存在
+                    1，存在且绑定了userID：
+                        说明用户以前已经绑定过了，直接免密登录绑定的账号
+                        1，生成token，通过userID获取logininfo
+                        2，存入redis并设置30分钟有效期
+                        3，清空敏感信息放入map中
+                        4，创建成功的ajaxResult将map放入resultObj中并返回
+                    2，不存在：
+                        1，将access_token 和 openid用URL地址参数的形式拼接到一个字符串中
+                        2，创建失败的ajaxResult将message设置为nobinder并将拼接的字符串放入resultObj中并返回
+            前端：
+                在callback.html的携带code发起Axios请求的then中：
+                1，判断返回的ajaxResult的success
+                    true：
+                        1，成功则保存token和logininfo到localStorage中
+                        2，跳转到首页
+                    false：
+                        判断message的值是否为nobinder
+                            1，是：
+                                将返回的字符串拼接到请求中跳转到绑定页面binder.html
+                            2，不是：提示用户错误信息
+        3，获取用户基本信息
+            前端：
+                1，在binder.html的钩子函数中截取access_token和openid
+                2，用户获取验证码按钮绑定事件
+                    0，电话号码相关校验
+                    1，发起获取验证码请求
+                    2，设置按钮禁用已经倒计时相关
+                3，绑定按钮绑定事件
+                    1，参数相关校验
+                    2，发送Axios请求携带4个参数：电话号码，验证码，access_token,openid
+                    3，根据请求的响应
+                        1，成功：
+                            1，保存token和logininfo到localStorage中
+                            2，跳转到首页
+                        2，失败则提示用户错误信息
+
+            后端：
+                1，修改以前的获取短信验证码方法，在临时对象中添加字段来区别不同的业务
+                        将业务分离，使方法功能单一化（解耦，提高代码复用率）
+                2，在业务层中
+                    1，非空校验
+                    2，判断验证码是否正确
+                    3，根据电话号码查询user表 用户是否存在
+                        1，存在：
+                            1，根据userid查询logininfo表得到logininfo对象 待用
+                        2，不存在：
+                            1，根据电话号码初始化一个user对象，给定默认密码
+                            2，copy一个logininfo对象
+                            3，添加logininfo对象
+                            4，设置user对象的logininfo_id 字段
+                            5，保存user对象
+                    4，根据微信开放平台的开发指南创建获取微信用户基本信息的连接
+                    5，工具类发送get请求获得json字符串
+                    6，使用JSONObject的parseObject(jsonStr, Wxuser.class)方法得到wxuser对象
+                        该方法能直接将数据复制到对象中，但需保证字段名一致
+                    7，给wxuser对象设置userid
+                    8,保存wxuser对象
+                    9， 登录成功那一套
+                        1，生成token，通过userID获取logininfo
+                        2，存入redis并设置30分钟有效期
+                        3，清空敏感信息放入map中并返回
+
+                注意：该方法需要开启事务，保证所有对象添加操作的一致性
+
+    回调域的作用
+        1.让微信方调用此页面，传递code

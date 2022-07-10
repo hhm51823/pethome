@@ -1,19 +1,29 @@
 package cn.raths.basic.service.impl;
 
 import cn.raths.basic.constant.BaseConstants;
-import cn.raths.basic.dto.AccountLoginDto;
-import cn.raths.basic.dto.PhoneCodeLoginDto;
+import cn.raths.basic.dto.*;
 import cn.raths.basic.exception.BusinessException;
 import cn.raths.basic.service.ILoginService;
+import cn.raths.basic.utils.AjaxResult;
+import cn.raths.basic.utils.HttpUtil;
 import cn.raths.basic.utils.MD5Utils;
+import cn.raths.basic.utils.StrUtils;
 import cn.raths.user.domain.Logininfo;
+import cn.raths.user.domain.User;
+import cn.raths.user.domain.Wxuser;
 import cn.raths.user.mapper.LogininfoMapper;
+import cn.raths.user.mapper.UserMapper;
+import cn.raths.user.mapper.WxuserMapper;
+import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.JsonParser;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.HashMap;
@@ -30,6 +40,12 @@ public class LoginServiceImpl implements ILoginService {
 
     @Autowired
     private RedisTemplate redisTemplate;
+
+    @Autowired
+    private WxuserMapper wxuserMapper;
+
+     @Autowired
+    private UserMapper userMapper;
 
     @Override
     public Map<String, Object> accountLogin(AccountLoginDto accountLoginDto) {
@@ -106,4 +122,151 @@ public class LoginServiceImpl implements ILoginService {
         map.put("logininfo", logininfo);
         return map;
     }
+
+    @Override
+    public void quit(String token) {
+        redisTemplate.opsForValue().set(token,"",1,TimeUnit.SECONDS);
+    }
+
+    /**
+    * @Title: wechatLogin
+    * @Description: 微信登录
+    * @Author: Lynn
+    * @Version: 1.0
+    * @Date:  2022/7/10 16:28
+    * @Parameters: [wechatCodeDto]
+    * @Return cn.raths.basic.utils.AjaxResult
+    */
+    @Override
+    public AjaxResult wechatLogin(@RequestBody WechatCodeDto wechatCodeDto) {
+        String code = wechatCodeDto.getCode();
+        if(StringUtils.isEmpty(code)){
+            throw new BusinessException("参数不能为空!");
+        }
+        // 拼接获取token和openID的URL地址
+        String getTokenUrl = BaseConstants.wechatConstant.BUSINESS_GETTOKEN_URL
+                .replace("APPID",BaseConstants.wechatConstant.APPID)
+                .replace("SECRET",BaseConstants.wechatConstant.SECRET)
+                .replace("CODE",code);
+        // 发送get请求
+        String jsonStr = HttpUtil.httpGet(getTokenUrl);
+        // 将json字符串转换为JSONObject对象
+        JSONObject jsonObject = JSONObject.parseObject(jsonStr);
+        // 根据openid查询wxuser
+        Wxuser wxuser = wxuserMapper.loadByOpenId(jsonObject.getString("openid"));
+        // 判断wxuser是否存在
+        if(wxuser != null && wxuser.getUserId() != null){ // wxuser存在且绑定了userID
+            Logininfo logininfo = logininfoMapper.loadByUserId(wxuser.getUserId());
+            String token = UUID.randomUUID().toString();
+            // 存入redis
+            redisTemplate.opsForValue().set(token, logininfo, 30, TimeUnit.MINUTES);
+            // 将敏感信息置为空
+            logininfo.setSalt("");
+            logininfo.setPassword("");
+            // 将数据保存到map
+            Map<String, Object> map = new HashMap<>();
+            map.put("token", token);
+            map.put("logininfo", logininfo);
+            return AjaxResult.getAjaxResult().setResultObj(map);
+        }
+        // 如果不存在则返回失败result并返回两个参数
+        StringBuffer prpamStr = new StringBuffer().append("?accessToken=")
+                .append(jsonObject.getString("access_token"))
+                .append("&openId=")
+                .append(jsonObject.getString("openid"));
+        return AjaxResult.error().setMessage("nobinder").setResultObj(prpamStr);
+    }
+
+    /**
+    * @Title: binder
+    * @Description: 微信登录注册绑定
+    * @Author: Lynn
+    * @Version: 1.0
+    * @Date:  2022/7/10 17:56
+    * @Parameters: [weChatBindDto]
+    * @Return java.util.Map<java.lang.String,java.lang.Object>
+    */
+    @Override
+    @Transactional
+    public Map<String, Object> binder(WeChatBindDto weChatBindDto) {
+        String accessToken = weChatBindDto.getAccessToken();
+        String openId = weChatBindDto.getOpenId();
+        String verifyCode = weChatBindDto.getVerifyCode();
+        String phone = weChatBindDto.getPhone();
+        // 为空校验
+        if(StringUtils.isEmpty(accessToken)
+            || StringUtils.isEmpty(openId)
+            || StringUtils.isEmpty(verifyCode)
+            || StringUtils.isEmpty(phone)){
+            throw new BusinessException("参数不能为空");
+        }
+        User user = userMapper.loadByPhone(phone);
+        Logininfo logininfo = null;
+        // 判断用户之前是否注册过
+        if(user == null){
+            // 根据手机号初始化user
+            user = phone2User(phone);
+            // 初始化logininfo
+            logininfo = user2Logininfo(user);
+            // 添加logininfo
+            logininfoMapper.save(logininfo);
+            // 设置user的logininfo_id
+            user.setLogininfoId(logininfo.getId());
+            // 添加user
+            userMapper.save(user);
+        }else{
+            // 根据userID获取logininfo
+            logininfo = logininfoMapper.loadByUserId(user.getId());
+        }
+        // 拼接获取微信基本信息的连接
+        String getWxuserUrl = BaseConstants.wechatConstant.BUSINESS_GETWXUSER_URL
+                .replace("ACCESS_TOKEN", accessToken)
+                .replace("OPENID", openId);
+        String jsonStr = HttpUtil.httpGet(getWxuserUrl);
+        Wxuser wxuser = JSONObject.parseObject(jsonStr, Wxuser.class);
+        wxuser.setUserId(user.getId());
+        wxuserMapper.save(wxuser);
+
+
+        String token = UUID.randomUUID().toString();
+        // 存入redis
+        redisTemplate.opsForValue().set(token, logininfo, 30, TimeUnit.MINUTES);
+        // 将敏感信息置为空
+        logininfo.setSalt("");
+        logininfo.setPassword("");
+        // 将数据保存到map
+        Map<String, Object> map = new HashMap<>();
+        map.put("token", token);
+        map.put("logininfo", logininfo);
+        return map;
+    }
+    private User phone2User(String phone) {
+        User user = new User();
+        user.setUsername(phone);
+        user.setPhone(phone);
+        // 生成盐值
+        String salt = StrUtils.getComplexRandomString(32);
+        user.setSalt(salt);
+        // 根据MD5生成加密后的密码
+        String saltPassword = MD5Utils.encrypByMd5(salt + "123456");
+        user.setPassword(saltPassword);
+        return user;
+    }
+
+    /**
+     * @Title: user2Logininfo
+     * @Description: 根据user对象初始化logininfo对象
+     * @Author: Lynn
+     * @Version: 1.0
+     * @Date:  2022/7/6 15:31
+     * @Parameters: [user]
+     * @Return cn.raths.user.domain.Logininfo
+     */
+    private Logininfo user2Logininfo(User user) {
+        Logininfo logininfo = new Logininfo();
+        BeanUtils.copyProperties(user, logininfo);
+        logininfo.setType(1);
+        return logininfo;
+    }
+
 }

@@ -64,37 +64,24 @@ public class VerifyCodeServiceImpl implements IVerifyCodeService {
     @Override
     public void smsCode(RegisterDto registerDto) {
         String phone = registerDto.getPhone();
-        String imageCodeKey = registerDto.getImageCodeKey();
-        String imageCodeValue = registerDto.getImageCodeValue();
+        String business = registerDto.getBusiness();
         // 为空校验
-        if (StringUtils.isEmpty(phone) || StringUtils.isEmpty(imageCodeKey) || StringUtils.isEmpty(imageCodeValue)){
-            throw new BusinessException("图形验证码和电话不能为空！");
+        if (StringUtils.isEmpty(phone) || StringUtils.isEmpty(business)){
+            throw new BusinessException("参数不能为空！");
+        }
+        if("register".equals(business)){
+            checkImageCode(registerDto);
+            sendCode(BaseConstants.VerifyCodeConstant.BUSINESS_REGISTER_PREFIX, phone);
+        }else if("binder".equals(business)){
+            sendCode(BaseConstants.VerifyCodeConstant.BUSINESS_BINDER_PREFIX, phone);
         }
 
-        // 根据imageCodeKey去Redis中获取值
-        String imageCodeValueTmp = redisTemplate.opsForValue().get(imageCodeKey).toString();
-        if (imageCodeValueTmp == null){
-            throw new BusinessException("验证码已过期！请重新获取！");
-        }
-        // 如果存在，判断用户输入的值和redis中的值是否相等，不区分大小写
-        if(!imageCodeValueTmp.equalsIgnoreCase(imageCodeValue)){
-            throw new BusinessException("验证码输入错误！");
-        }
-        if (registerDto.getType() == 0){
-            Employee employee = employeeMapper.loadByPhone(phone);
-            if(employee != null){
-                throw new BusinessException("该用户已经注册,请直接登录!");
-            }
-        }else{
-            // 判断用户是否存在
-            User user = userMapper.loadByPhone(phone);
-            if(user != null){
-                throw new BusinessException("该用户已经注册,请直接登录!");
-            }
-        }
+
+    }
+    public void sendCode(String business, String phone){
         // 根据业务键加电话从redis中获取值并判断是否存在
         // 拼接电话验证码的key
-        String smsCodeKey = BaseConstants.VerifyCodeConstant.BUSINESS_REGISTER_PREFIX + phone;
+        String smsCodeKey = business + phone;
         // 获取redis中的电话验证码的值
         Object smsCodeValueTmp = redisTemplate.opsForValue().get(smsCodeKey);
         // 保存电话验证码
@@ -122,6 +109,47 @@ public class VerifyCodeServiceImpl implements IVerifyCodeService {
         redisTemplate.opsForValue().set(smsCodeKey, smsCodeValue, 3, TimeUnit.MINUTES);
         System.out.println("手机" + msg);
     }
+    /**
+    * @Title: checkImageCode
+    * @Description: 图形验证码校验
+    * @Author: Lynn
+    * @Version: 1.0
+    * @Date:  2022/7/10 17:41
+    * @Parameters: [registerDto]
+    * @Return void
+    */
+    public void checkImageCode(RegisterDto registerDto){
+        String phone = registerDto.getPhone();
+        String imageCodeKey = registerDto.getImageCodeKey();
+        String imageCodeValue = registerDto.getImageCodeValue();
+        // 为空校验
+        if (StringUtils.isEmpty(imageCodeKey) || StringUtils.isEmpty(imageCodeValue)){
+            throw new BusinessException("参数不能为空！");
+        }
+
+        // 根据imageCodeKey去Redis中获取值
+        String imageCodeValueTmp = redisTemplate.opsForValue().get(imageCodeKey).toString();
+        if (imageCodeValueTmp == null){
+            throw new BusinessException("验证码已过期！请重新获取！");
+        }
+        // 如果存在，判断用户输入的值和redis中的值是否相等，不区分大小写
+        if(!imageCodeValueTmp.equalsIgnoreCase(imageCodeValue)){
+            throw new BusinessException("验证码输入错误！");
+        }
+        if (registerDto.getType() == 0){
+            Employee employee = employeeMapper.loadByPhone(phone);
+            if(employee != null){
+                throw new BusinessException("该用户已经注册,请直接登录!");
+            }
+        }else{
+            // 判断用户是否存在
+            User user = userMapper.loadByPhone(phone);
+            if(user != null){
+                throw new BusinessException("该用户已经注册,请直接登录!");
+            }
+        }
+    }
+
 
     @Override
     public void emailCode(EmailRegisterDto emailRegisterDto) {

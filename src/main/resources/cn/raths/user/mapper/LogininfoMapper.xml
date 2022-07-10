@@ -58,6 +58,12 @@
             and type = #{type}
     </select>
 
+<!--根UserId查询对象-->
+    <select id="loadByUserId" resultType="Logininfo">
+        select tl.* from t_logininfo tl join t_user tu on tl.id = tu.logininfo_id
+            where tu.id = #{userId}
+    </select>
+
 
     <!--加载所有对象-->
     <select id="loadAll" resultType="Logininfo">
