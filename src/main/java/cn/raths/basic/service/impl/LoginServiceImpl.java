@@ -200,6 +200,20 @@ public class LoginServiceImpl implements ILoginService {
             || StringUtils.isEmpty(phone)){
             throw new BusinessException("参数不能为空");
         }
+        // 验证码校验
+        // 拼接redis中电话验证码的key
+        String phoneCodeKey = BaseConstants.VerifyCodeConstant.BUSINESS_BINDER_PREFIX + phone;
+        // 从redis中获取值
+        Object phoneCodeVaule = redisTemplate.opsForValue().get(phoneCodeKey);
+        if (phoneCodeVaule == null){
+            throw new BusinessException("验证码已过期！请从新获取！");
+        }
+        // 分解phoneCodeVaule
+        String phoneCodeTmp = phoneCodeVaule.toString().split(":")[1];
+        // 判断验证码是否正确
+        if(!phoneCodeTmp.equals(verifyCode)){
+            throw new BusinessException("验证码错误！请从新输入！");
+        }
         User user = userMapper.loadByPhone(phone);
         Logininfo logininfo = null;
         // 判断用户之前是否注册过
