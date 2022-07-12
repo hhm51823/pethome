@@ -1,5 +1,6 @@
 package cn.raths.org.controller;
 
+import cn.raths.basic.annotation.PreAuthorize;
 import cn.raths.basic.dto.ShopRegisterDto;
 import cn.raths.basic.exception.BusinessException;
 import cn.raths.org.domain.ShopAuditLog;
@@ -29,6 +30,7 @@ public class ShopController {
      * @return Ajaxresult转换结果
      */
     @PutMapping
+    @PreAuthorize(name = "新增或修改店铺", sn = "shop:saveOrUpt")
     public AjaxResult addOrUpdate(@RequestBody Shop shop){
         try {
             if( shop.getId()!=null)
@@ -47,6 +49,7 @@ public class ShopController {
     * @return
     */
     @DeleteMapping(value="/{id}")
+    @PreAuthorize(name = "删除店铺", sn = "shop:delete")
     public AjaxResult delete(@PathVariable("id") Long id){
         try {
             shopService.remove(id);
@@ -72,6 +75,7 @@ public class ShopController {
     * @return
     */
     @GetMapping()
+    @PreAuthorize(name = "店铺列表", sn = "shop:loadAll")
     public List<Shop> list(){
         return shopService.loadAll();
     }
@@ -84,6 +88,7 @@ public class ShopController {
     * @return PageList 分页对象
     */
     @PostMapping()
+    @PreAuthorize(name = "店铺高级查询列表", sn = "shop:list")
     public PageList<Shop> json(@RequestBody ShopQuery query)
     {
         return shopService.queryList(query);
@@ -123,6 +128,7 @@ public class ShopController {
     * @Return cn.raths.basic.utils.AjaxResult
     */
     @PostMapping("/audit/reject")
+    @PreAuthorize(name = "驳回店铺入驻", sn = "shop:reject")
     public AjaxResult reject(@RequestBody ShopAuditLog shopAuditLog)
     {
         try {
@@ -147,6 +153,7 @@ public class ShopController {
     * @Return cn.raths.basic.utils.AjaxResult
     */
     @PostMapping("/audit/pass")
+    @PreAuthorize(name = "通过店铺入驻", sn = "shop:pass")
     public AjaxResult pass(@RequestBody ShopAuditLog shopAuditLog)
     {
         try {
@@ -171,6 +178,7 @@ public class ShopController {
     * @Return cn.raths.basic.utils.AjaxResult
     */
     @PostMapping("/audit/prohibit")
+    @PreAuthorize(name = "拒接店铺入驻", sn = "shop:prohibit")
     public AjaxResult prohibit(@RequestBody ShopAuditLog shopAuditLog)
     {
         try {
@@ -201,12 +209,14 @@ public class ShopController {
     }
 
     @GetMapping("/export/excel")
+    @PreAuthorize(name = "导出店铺表", sn = "shop:exportExcel")
     public void exportExcel(HttpServletResponse response)
     {
         shopService.exportExcel(response);
     }
 
     @PostMapping("/import/excel")
+    @PreAuthorize(name = "导入店铺表", sn = "shop:importExcel")
     public AjaxResult importExcel(@RequestPart(value = "file", required = true)MultipartFile file)
     {
         try {

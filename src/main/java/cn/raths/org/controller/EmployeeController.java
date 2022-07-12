@@ -1,5 +1,6 @@
 package cn.raths.org.controller;
 
+import cn.raths.basic.annotation.PreAuthorize;
 import cn.raths.basic.utils.AjaxResult;
 import cn.raths.basic.utils.PageList;
 import cn.raths.org.domain.Employee;
@@ -47,6 +48,7 @@ public class EmployeeController {
     */
     @GetMapping
     @ApiOperation(value = "查询所有")
+    @PreAuthorize(name = "员工列表", sn = "employee:loadAll")
     public List<Employee> loadAll(){
         return employeeService.loadAll();
     }
@@ -62,6 +64,7 @@ public class EmployeeController {
     */
     @PutMapping
     @ApiOperation(value = "新增或修改部门")
+    @PreAuthorize(name = "新增或修改员工", sn = "employee:saveOrUpt")
     public AjaxResult addOrUpt(@ApiParam(value="部门对象",required = true) @RequestBody Employee employee){
         try {
             if(employee.getId() == null){
@@ -87,6 +90,7 @@ public class EmployeeController {
     */
     @DeleteMapping("/{id}")
     @ApiOperation(value = "根据ID删除")
+    @PreAuthorize(name = "删除员工", sn = "employee:delete")
     public AjaxResult remove(@ApiParam(value="主键ID",required = true) @PathVariable("id") Long id){
         try {
             employeeService.remove(id);
@@ -108,12 +112,14 @@ public class EmployeeController {
     */
     @PostMapping
     @ApiOperation(value = "高级查询")
+    @PreAuthorize(name = "高级查询员工列别哦啊", sn = "employee:list")
     public PageList<Employee> queryList(@ApiParam(value="高级查询条件对象",required = true) @RequestBody EmployeeQuery employeeQuery){
         return employeeService.queryList(employeeQuery);
     }
 
     @PatchMapping
     @ApiOperation(value = "根据ID批量删除")
+    @PreAuthorize(name = "批量删除员工", sn = "employee:patchDel")
     public AjaxResult patchDel(@ApiParam(value="主键ID数组",required = true) @RequestBody Long[] ids){
         try {
             employeeService.patchDel(ids);

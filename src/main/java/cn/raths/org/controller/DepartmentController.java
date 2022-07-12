@@ -1,5 +1,6 @@
 package cn.raths.org.controller;
 
+import cn.raths.basic.annotation.PreAuthorize;
 import cn.raths.basic.utils.AjaxResult;
 import cn.raths.basic.utils.PageList;
 import cn.raths.org.domain.Department;
@@ -47,6 +48,7 @@ public class DepartmentController {
     */
     @GetMapping
     @ApiOperation(value = "查询所有")
+    @PreAuthorize(name = "部门列表", sn = "department:loadall")
     public List<Department> loadAll(){
         return departmentService.loadAll();
     }
@@ -62,6 +64,7 @@ public class DepartmentController {
     */
     @PutMapping
     @ApiOperation(value = "新增或修改部门")
+    @PreAuthorize(name = "删除或修改部门", sn = "department:saveOrUpt")
     public AjaxResult addOrUpt(@ApiParam(value="部门对象",required = true) @RequestBody Department department){
         try {
             if(department.getId() == null){
@@ -87,6 +90,7 @@ public class DepartmentController {
     */
     @DeleteMapping("/{id}")
     @ApiOperation(value = "根据ID删除")
+    @PreAuthorize(name = "删除部门", sn = "department:delete")
     public AjaxResult remove(@ApiParam(value="主键ID",required = true) @PathVariable("id") Long id){
         try {
             departmentService.remove(id);
@@ -108,12 +112,14 @@ public class DepartmentController {
     */
     @PostMapping
     @ApiOperation(value = "高级查询")
+    @PreAuthorize(name = "部门高级查询列表", sn = "department:list")
     public PageList<Department> queryList(@ApiParam(value="高级查询条件对象",required = true) @RequestBody DepartmentQuery departmentQuery){
         return departmentService.queryList(departmentQuery);
     }
 
     @PatchMapping
     @ApiOperation(value = "根据ID批量删除")
+    @PreAuthorize(name = "批量删除部门", sn = "department:patchDel")
     public AjaxResult patchDel(@ApiParam(value="主键ID数组",required = true) @RequestBody Long[] ids){
         try {
             departmentService.patchDel(ids);

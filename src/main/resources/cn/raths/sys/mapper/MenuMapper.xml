@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.raths.sys.mapper.MenuMapper">
+    <!--保存对象-->
+    <insert id="save" parameterType="Menu" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into t_menu(
+                            name,
+                            component,
+                            url,
+                            icon,
+                            `index`,
+                            parent_id,
+                            intro,
+                            state,
+                            dirPath
+        ) values(
+                #{name},
+                #{component},
+                #{url},
+                #{icon},
+                #{index},
+                #{parent.id},
+                #{intro},
+                #{state},
+                #{dirPath}
+                 )
+    </insert>
+    <!--删除对象-->
+    <delete id="remove" parameterType="long">
+        delete from t_menu where id = #{id}
+    </delete>
+
+    <!--更新对象-->
+    <update id="update" parameterType="Menu">
+        update t_menu
+        set
+
+                            name = #{name},
+                            component = #{component},
+                            url = #{url},
+                            icon = #{icon},
+                            `index` = #{index},
+                            parent_id = #{parent.id},
+                            intro = #{intro},
+                            dirPath = #{dirPath},
+                            state = #{state}        where id = #{id}
+    </update>
+    <!--加载对象-->
+    <select id="loadById" resultType="Menu" parameterType="long">
+        select * from t_menu where id = #{id}
+    </select>
+    <!--加载所有对象-->
+    <select id="loadAll" resultType="Menu">
+        select * from t_menu
+    </select>
+    <!--//查询总数=参数（查询对象），返回值：long-->
+    <select id="queryCount" parameterType="MenuQuery" resultType="int">
+        select count(t.id) from t_menu t
+        <include refid="whereSql"/>
+    </select>
+    <!--//查询当前页数据=参数（查询对象），返回值:List-->
+    <select id="queryList" parameterType="MenuQuery" resultMap="BaseResultMap">
+        select t.*, tm.id tmId, tm.name tmName from t_menu t left join t_menu tm on t.parent_id = tm.id
+        <include refid="whereSql"/>
+        limit #{begin},#{pageSize}
+    </select>
+
+
+    <sql id="whereSql">
+        <where>
+            <if test="keyword!=null and keyword!=''">
+                and (t.name like concat('%',#{keyword},'%'))
+            </if>
+        </where>
+    </sql>
+
+    <!--//批量删除-->
+    <delete id="patchDel">
+        delete from t_menu where id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.raths.sys.domain.Menu">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="component" property="component" />
+        <result column="url" property="url" />
+        <result column="icon" property="icon" />
+        <result column="index" property="index" />
+        <result column="parent_id" property="parentId" />
+        <result column="intro" property="intro" />
+        <result column="state" property="state" />
+        <result column="dirPath" property="dirPath" />
+        <association property="parent" javaType="Menu">
+            <id column="tmId" property="id"></id>
+            <result column="tmName" property="name"></result>
+        </association>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+id,
+        name, component, url, icon, index, parent_id, intro, state
+    </sql>
+
+</mapper>

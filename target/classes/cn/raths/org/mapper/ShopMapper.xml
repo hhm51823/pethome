@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.raths.org.mapper.ShopMapper">
+    <!--保存对象-->
+    <insert id="save" parameterType="Shop" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into t_shop(
+                            name,
+                            tel,
+                            registerTime,
+                            state,
+                            address,
+                            logo,
+                            admin_id
+        ) values(
+                #{name},
+                #{tel},
+                #{registerTime},
+                #{state},
+                #{address},
+                #{logo},
+                #{adminId}        )
+    </insert>
+    <insert id="batchSave">
+        insert into t_shop(
+            name,
+            tel,
+            registerTime,
+            state,
+            address,
+            logo,
+            admin_id)
+            values
+        <foreach collection="list" item="shop" separator=",">
+            (
+            #{shop.name},
+            #{shop.tel},
+            #{shop.registerTime},
+            #{shop.state},
+            #{shop.address},
+            #{shop.logo},
+            #{shop.adminId}
+            )
+        </foreach>
+
+    </insert>
+
+
+    <!--删除对象-->
+    <delete id="remove" parameterType="long">
+        delete from t_shop where id = #{id}
+    </delete>
+
+    <!--更新对象-->
+    <update id="update" parameterType="Shop">
+        update t_shop
+        set
+
+                            name = #{name},
+                            tel = #{tel},
+                            registerTime = #{registerTime},
+                            state = #{state},
+                            address = #{address},
+                            logo = #{logo},
+                            admin_id = #{adminId}        where id = #{id}
+    </update>
+    <!--加载对象-->
+    <select id="loadById" resultType="Shop" parameterType="long">
+        select * from t_shop where id = #{id}
+    </select>
+    <!--根据店铺名加载对象-->
+    <select id="loadByName" resultType="Shop" parameterType="String">
+        select * from t_shop where name = #{name}
+    </select>
+    <!--报表数据-->
+    <select id="echarts" resultType="ShopVo">
+        select state,count(id) as count from t_shop group by state order by state
+    </select>
+    <!--加载所有对象-->
+    <select id="loadAll" resultType="Shop">
+        select * from t_shop
+    </select>
+    <!--//查询总数=参数（查询对象），返回值：long-->
+    <select id="queryCount" parameterType="ShopQuery" resultType="int">
+        select count(s.id) from t_shop s
+        <include refid="whereSql"/>
+    </select>
+    <!--//查询当前页数据=参数（查询对象），返回值:List-->
+<!--  s left join t_employee e on s.admin_id = e.id  -->
+    <select id="queryList" parameterType="ShopQuery" resultMap="BaseResultMap">
+        select s.*, e.id eId, e.username eUsername
+               from t_shop s
+            left join t_employee e on s.admin_id = e.id
+        <include refid="whereSql"/>
+        limit #{begin},#{pageSize}
+    </select>
+
+
+    <sql id="whereSql">
+        <where>
+            <if test="keyword!=null and keyword!=''">
+                and (s.name like concat('%',#{keyword},'%'))
+            </if>
+        </where>
+    </sql>
+
+    <!--//批量删除-->
+    <delete id="patchDel">
+        delete from t_shop where id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.raths.org.domain.Shop">
+        <result column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="tel" property="tel" />
+        <result column="registerTime" property="registerTime" />
+        <result column="state" property="state" />
+        <result column="address" property="address" />
+        <result column="logo" property="logo" />
+        <result column="admin_id" property="adminId" />
+        <association property="admin" javaType="Employee">
+            <id column="eId" property="id"></id>
+            <result column="eUsername" property="username"></result>
+        </association>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+id,
+        name, tel, registerTime, state, address, logo, admin_id
+    </sql>
+
+</mapper>

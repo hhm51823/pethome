@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.raths.sys.mapper.TemdictionaryTypeMapper">
+    <!--查询所有-->
+    <select id="loadAll" resultType="TemdictionaryType">
+        select * from t_systemdictionarytype
+    </select>
+
+    <!--根据id查询-->
+    <select id="loadById" resultType="TemdictionaryType">
+        select * from t_systemdictionarytype where id = #{id}
+    </select>
+
+    <!--根据id删除-->
+    <delete id="remove">
+        delete
+        from t_systemdictionarytype
+        where id = #{id}
+    </delete>
+
+    <!--修改-->
+    <update id="update">
+        update t_systemdictionarytype set
+                  sn=#{sn},
+                  name=#{name}
+        where id = #{id}
+    </update>
+    <!--添加-->
+    <insert id="save">
+        insert into t_systemdictionarytype (sn,name)
+        values (#{sn}, #{name});
+    </insert>
+
+    <resultMap id="queryListResultMap" type="TemdictionaryType">
+        <id property="id" column="id"></id>
+        <result property="sn" column="sn"></result>
+        <result property="name" column="name"></result>
+        <collection property="children" ofType="TemdictionaryDetail">
+            <id property="id" column="dId"></id>
+            <result property="name" column="dName"></result>
+        </collection>
+    </resultMap>
+
+    <sql id="queryListWhere">
+        <where>
+            <if test="keyword != null and !''.equals(keyword.trim())">
+                and t.name like concat('%',#{keyword},'%')
+                or t.sn like concat('%',#{keyword},'%')
+            </if>
+        </where>
+    </sql>
+    <!--高级查询-->
+    <select id="queryList" resultMap="queryListResultMap">
+        select t.*, d.id dId,d.name dName
+        from t_systemdictionarytype t left join t_systemdictionarydetail d on t.id = d.types_id
+        <include refid="queryListWhere"></include>
+        GROUP BY t.sn
+        order by t.id
+        limit #{begin}, #{pageSize}
+    </select>
+
+    <!-- 当前查询总条数 -->
+    <select id="queryCount" resultType="int">
+        select count(id) from t_systemdictionarytype t
+        <include refid="queryListWhere"></include>
+    </select>
+
+    <delete id="patchDel">
+        delete from t_systemdictionarytype where id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
