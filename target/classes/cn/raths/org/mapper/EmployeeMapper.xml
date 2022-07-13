@@ -129,4 +129,14 @@
             #{id}
         </foreach>
     </delete>
+
+    <delete id="removeEmployeeRole">
+        delete from t_employee_role where employee_id = #{id}
+    </delete>
+    <insert id="saveEmployeeRole">
+        insert into t_employee_role (employee_id,role_id) values
+        <foreach collection="rIds" item="rId" separator=",">
+            (#{id},#{rId})
+        </foreach>
+    </insert>
 </mapper>

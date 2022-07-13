@@ -50,7 +50,7 @@
     <select id="queryList" parameterType="PermissionQuery" resultType="Permission">
         select * from t_permission
         <include refid="whereSql"/>
-        limit #{start},#{pageSize}
+        limit #{begin},#{pageSize}
     </select>
 
 
@@ -83,5 +83,20 @@
 id,
         name, url, descs, sn
     </sql>
+
+    <!--查询角色对应的权限ID-->
+    <select id="loadByRoleId" resultType="Permission">
+        select tp.* from t_role_permission trp
+            join t_permission tp on tp.id = trp.permission_id
+        where trp.role_id = #{rId}
+    </select>
+  <!--查询角色对应的权限ID-->
+    <select id="loadPermissionByLogininfoId" resultType="java.lang.String">
+        select tp.sn from t_employee e
+            join t_employee_role ter on e.id = ter.employee_id
+            join t_role_permission trp on ter.role_id = trp.role_id
+            join t_permission tp on trp.permission_id = tp.id
+        where e.logininfo_id = #{logininfoId}
+    </select>
 
 </mapper>

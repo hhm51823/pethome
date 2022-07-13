@@ -6,6 +6,7 @@ import cn.raths.basic.utils.StrUtils;
 import cn.raths.org.domain.Employee;
 import cn.raths.org.mapper.EmployeeMapper;
 import cn.raths.org.service.IEmployeeService;
+import cn.raths.sys.domain.Role;
 import cn.raths.user.domain.Logininfo;
 import cn.raths.user.mapper.LogininfoMapper;
 import org.springframework.beans.BeanUtils;
@@ -18,21 +19,31 @@ public class EmployeeServiceIMpl extends BaseServiceImpl<Employee> implements IE
 
     @Autowired
     private LogininfoMapper logininfoMapper;
+    @Autowired
+    private EmployeeMapper EmployeeMapper;
 
 
-
+    public void removeEmployeeRole(Long id){
+        EmployeeMapper.removeEmployeeRole(id);
+    }
+    public void saveEmployeeRole(Employee employee){
+        if (employee.getRoles().size() > 0){
+            EmployeeMapper.saveEmployeeRole(employee.getId(),employee.getRoles());
+        }
+    }
     @Override
     public void save(Employee employee) {
         // 初始化emp对象
         employeeInit(employee);
-        super.save(employee);
+        EmployeeMapper.save(employee);
         // 初始化logininfo对象
         Logininfo logininfo = employee2Logininfo(employee);
         logininfoMapper.save(logininfo);
         // 设置logininfo id
         employee.setLogininfoId(logininfo.getId());
-        super.update(employee);
+        EmployeeMapper.update(employee);
 
+        saveEmployeeRole(employee);
     }
 
     @Override
@@ -42,7 +53,8 @@ public class EmployeeServiceIMpl extends BaseServiceImpl<Employee> implements IE
         if(employee != null) {
             logininfoMapper.remove(employee.getLogininfoId());
         }
-        super.remove(id);
+        EmployeeMapper.remove(id);
+        removeEmployeeRole(id);
     }
 
     @Override
@@ -50,13 +62,16 @@ public class EmployeeServiceIMpl extends BaseServiceImpl<Employee> implements IE
         // 初始化employee
         employeeInit(employee);
         // 修改数据
-        super.update(employee);
+        EmployeeMapper.update(employee);
         // 赋值数据，这会覆盖掉id
         Logininfo logininfo = employee2Logininfo(employee);
         // 从新设置id
         logininfo.setId(employee.getLogininfoId());
         // 修改logininfo
         logininfoMapper.update(logininfo);
+
+        removeEmployeeRole(employee.getId());
+        saveEmployeeRole(employee);
     }
 
     private void employeeInit(Employee employee) {

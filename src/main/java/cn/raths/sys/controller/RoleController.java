@@ -76,9 +76,17 @@ public class RoleController {
     * @param query 查询对象
     * @return PageList 分页对象
     */
-    @PostMapping("/list")
+    @PostMapping
     public PageList<Role> json(@RequestBody RoleQuery query)
     {
         return roleService.queryList(query);
     }
+
+    // 根据员工id获取角色集合
+    @GetMapping("/emp/{id}")
+    public List<Role> loadByEmpId(@PathVariable("id")Long id)
+    {
+        return roleService.loadByEmpId(id);
+    }
+
 }

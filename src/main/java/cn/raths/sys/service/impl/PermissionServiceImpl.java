@@ -1,11 +1,14 @@
 package cn.raths.sys.service.impl;
 
-import cn.raths.sys.domain.Permission;
-import cn.raths.sys.service.IPermissionService;
 import cn.raths.basic.service.impl.BaseServiceImpl;
+import cn.raths.sys.domain.Permission;
+import cn.raths.sys.mapper.PermissionMapper;
+import cn.raths.sys.service.IPermissionService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -17,5 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class PermissionServiceImpl extends BaseServiceImpl<Permission> implements IPermissionService {
+    @Autowired
+    private PermissionMapper permissionMapper;
 
+    public List<Long> loadByRoleId(Long rId){
+        List<Permission> permissionList = permissionMapper.loadByRoleId(rId);
+        List<Long> permissionIds = permissionList.stream().map(Permission::getId).collect(Collectors.toList());
+        return permissionIds;
+    }
 }

@@ -76,9 +76,17 @@ public class PermissionController {
     * @param query 查询对象
     * @return PageList 分页对象
     */
-    @PostMapping("/list")
+    @PostMapping
     public PageList<Permission> json(@RequestBody PermissionQuery query)
     {
         return permissionService.queryList(query);
     }
+
+    //获取用户
+    @GetMapping("/ids/{id}")
+    public List<Long> loadByRoleId(@PathVariable("id")Long id)
+    {
+        return permissionService.loadByRoleId(id);
+    }
+
 }

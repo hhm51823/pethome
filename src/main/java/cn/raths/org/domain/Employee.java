@@ -3,6 +3,8 @@ package cn.raths.org.domain;
 import cn.raths.basic.domain.BaseDomain;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class Employee extends BaseDomain {
 
@@ -35,4 +37,7 @@ public class Employee extends BaseDomain {
 
     // 第二次输入密码
     private String comfirmPassword;
+
+
+    private List<Long> roles;
 }

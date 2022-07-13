@@ -24,30 +24,36 @@
                             sn = #{sn}        where id = #{id}
     </update>
     <!--加载对象-->
-    <select id="loadById" resultType="Role" parameterType="long">
-        select * from t_role where id = #{id}
+    <select id="loadById" resultMap="BaseResultMap" parameterType="long">
+        select tr.*, tm.id tmId, tm.parent_id tmParentId
+        from t_role tr
+             left join t_role_menu trm on tr.id = trm.role_id
+             left join t_menu tm on trm.menu_id = tm.id
+        where tr.id = #{id}
     </select>
+
     <!--加载所有对象-->
     <select id="loadAll" resultType="Role">
         select * from t_role
     </select>
     <!--//查询总数=参数（查询对象），返回值：long-->
     <select id="queryCount" parameterType="RoleQuery" resultType="int">
-        select count(id) from t_role
+        select count(tr.id) from t_role tr
         <include refid="whereSql"/>
     </select>
     <!--//查询当前页数据=参数（查询对象），返回值:List-->
-    <select id="queryList" parameterType="RoleQuery" resultType="Role">
-        select * from t_role
+    <select id="queryList" parameterType="RoleQuery" resultMap="BaseResultMap">
+        select tr.* from t_role tr
         <include refid="whereSql"/>
-        limit #{start},#{pageSize}
+        limit #{begin},#{pageSize}
     </select>
+
 
 
     <sql id="whereSql">
         <where>
             <if test="keyword!=null and keyword!=''">
-                and (name like concat('%',#{keyword},'%'))
+                and (tr.name like concat('%',#{keyword},'%'))
             </if>
         </where>
     </sql>
@@ -64,12 +70,40 @@
     <result column="id" property="id" />
         <result column="name" property="name" />
         <result column="sn" property="sn" />
+        <collection property="ownMenus" ofType="Menu">
+            <id column="tmId" property="id"></id>
+            <result column="tmParentId" property="parentId"></result>
+        </collection>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-id,
-        name, sn
+        id,name, sn
     </sql>
+    <delete id="removeRoleMenu">
+        delete from t_role_menu where role_id = #{roleId}
+    </delete>
+    <delete id="removeRolePermission">
+        delete from t_role_permission where role_id = #{roleId}
+    </delete>
 
+    <insert id="saveRoleMenu">
+        insert into t_role_menu(role_id,menu_id) values
+        <foreach collection="mIds" item="mId" separator=",">
+            (#{rId},#{mId})
+        </foreach>
+    </insert>
+    <insert id="saveRolePermission">
+        insert into t_role_permission values
+        <foreach collection="pIds" item="pId" separator=",">
+            (#{rId},#{pId})
+        </foreach>
+    </insert>
+
+    <!--根据员工id查询角色集合-->
+    <select id="loadByEmpId" resultType="Role">
+        select tr.* from t_employee_role ter
+            join t_role tr  on tr.id = ter.role_id
+        where ter.employee_id = #{eId}
+    </select>
 </mapper>

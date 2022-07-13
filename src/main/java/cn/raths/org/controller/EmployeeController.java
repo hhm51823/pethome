@@ -112,7 +112,7 @@ public class EmployeeController {
     */
     @PostMapping
     @ApiOperation(value = "高级查询")
-    @PreAuthorize(name = "高级查询员工列别哦啊", sn = "employee:list")
+    @PreAuthorize(name = "高级查询员工列表", sn = "employee:list")
     public PageList<Employee> queryList(@ApiParam(value="高级查询条件对象",required = true) @RequestBody EmployeeQuery employeeQuery){
         return employeeService.queryList(employeeQuery);
     }

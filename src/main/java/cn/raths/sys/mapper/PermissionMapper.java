@@ -4,6 +4,8 @@ import cn.raths.sys.domain.Permission;
 import cn.raths.basic.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * <p>
  *  Mapper 接口
@@ -16,4 +18,8 @@ import org.apache.ibatis.annotations.Mapper;
 public interface PermissionMapper extends BaseMapper<Permission> {
 
     Permission loadBySn(String sn);
+
+    List<Permission> loadByRoleId(Long rId);
+
+    List<String> loadPermissionByLogininfoId(Long logininfoId);
 }
