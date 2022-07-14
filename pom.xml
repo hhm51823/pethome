@@ -140,6 +140,17 @@
             <artifactId>easypoi-annotation</artifactId>
             <version>4.2.0</version>
         </dependency>
+
+        <!--jwttoken环境-->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>0.9.0</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
