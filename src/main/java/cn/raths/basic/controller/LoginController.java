@@ -20,6 +20,15 @@ public class LoginController {
     @Autowired
     private ILoginService loginService;
 
+    /**
+    * @Title: accountLogin
+    * @Description: 账号密码登录
+    * @Author: Lynn
+    * @Version: 1.0
+    * @Date:  2022/7/14 16:42
+    * @Parameters: [accountLoginDto]
+    * @Return cn.raths.basic.utils.AjaxResult
+    */
     @PostMapping("/account")
     public AjaxResult accountLogin(@RequestBody AccountLoginDto accountLoginDto)
     {
@@ -35,6 +44,15 @@ public class LoginController {
         }
     }
 
+    /**
+    * @Title: phoneCodeLogin
+    * @Description: 短信验证码登录
+    * @Author: Lynn
+    * @Version: 1.0
+    * @Date:  2022/7/14 16:42
+    * @Parameters: [phoneCodeLoginDto]
+    * @Return cn.raths.basic.utils.AjaxResult
+    */
     @PostMapping("/phoneCode")
     public AjaxResult phoneCodeLogin(@RequestBody PhoneCodeLoginDto phoneCodeLoginDto)
     {
@@ -49,20 +67,17 @@ public class LoginController {
             return AjaxResult.error();
         }
     }
-    @GetMapping("/quit/{token}")
-    public AjaxResult quit(@PathVariable(value = "token") String token){
-        try {
-            loginService.quit(token);
-            return AjaxResult.getAjaxResult();
-        }catch (BusinessException e){
-            e.printStackTrace();
-            return AjaxResult.error().setMessage(e.getMessage());
-        }catch (Exception e) {
-            e.printStackTrace();
-            return AjaxResult.error();
-        }
-    }
 
+
+    /**
+    * @Title: wechatLogin
+    * @Description: 微信登录
+    * @Author: Lynn
+    * @Version: 1.0
+    * @Date:  2022/7/14 16:44
+    * @Parameters: [wechatCodeDto]
+    * @Return cn.raths.basic.utils.AjaxResult
+    */
     @PostMapping("/wechat")
     public AjaxResult wechatLogin(@RequestBody WechatCodeDto wechatCodeDto){
         try {
@@ -75,6 +90,16 @@ public class LoginController {
             return AjaxResult.error();
         }
     }
+
+    /**
+    * @Title: binder
+    * @Description: 微信绑定
+    * @Author: Lynn
+    * @Version: 1.0
+    * @Date:  2022/7/14 16:44
+    * @Parameters: [weChatBindDto]
+    * @Return cn.raths.basic.utils.AjaxResult
+    */
      @PostMapping("/wechat/binder")
     public AjaxResult binder(@RequestBody WeChatBindDto weChatBindDto){
         try {

@@ -47,3 +47,9 @@ logging:
   level:
     cn.raths: trace
 
+
+# 自定义jwt公钥密钥文件夹名称配置，可以通过@Value("${配置路径}")SPEL表达式获取
+jwt:
+  rsa:
+    pri: jwt/pethome_auth_rsa.pri
+    pub: jwt/pethome_auth_rsa.pub

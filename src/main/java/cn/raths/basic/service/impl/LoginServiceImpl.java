@@ -3,11 +3,17 @@ package cn.raths.basic.service.impl;
 import cn.raths.basic.constant.BaseConstants;
 import cn.raths.basic.dto.*;
 import cn.raths.basic.exception.BusinessException;
+import cn.raths.basic.jwt.JwtUtils;
+import cn.raths.basic.jwt.RsaUtils;
+import cn.raths.basic.jwt.UserInfo;
 import cn.raths.basic.service.ILoginService;
 import cn.raths.basic.utils.AjaxResult;
 import cn.raths.basic.utils.HttpUtil;
 import cn.raths.basic.utils.MD5Utils;
 import cn.raths.basic.utils.StrUtils;
+import cn.raths.sys.domain.Menu;
+import cn.raths.sys.mapper.MenuMapper;
+import cn.raths.sys.mapper.PermissionMapper;
 import cn.raths.user.domain.Logininfo;
 import cn.raths.user.domain.User;
 import cn.raths.user.domain.Wxuser;
@@ -18,6 +24,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonParser;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -26,7 +33,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.security.PrivateKey;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -47,6 +56,26 @@ public class LoginServiceImpl implements ILoginService {
      @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private PermissionMapper permissionMapper;
+
+    @Autowired
+    private MenuMapper menuMapper;
+
+    @Value("${jwt.rsa.pri}")
+    private String jwtRsaPri;
+
+
+
+    /**
+    * @Title: accountLogin
+    * @Description: 账号密码登录
+    * @Author: Lynn
+    * @Version: 1.0
+    * @Date:  2022/7/14 16:45
+    * @Parameters: [accountLoginDto]
+    * @Return java.util.Map<java.lang.String,java.lang.Object>
+    */
     @Override
     public Map<String, Object> accountLogin(AccountLoginDto accountLoginDto) {
         String account = accountLoginDto.getAccount();
@@ -68,15 +97,43 @@ public class LoginServiceImpl implements ILoginService {
         if(!logininfo.getPassword().equals(password)){
             throw new BusinessException("账号或密码错误!");
         }
-        // 生成UUID
-        String token = UUID.randomUUID().toString();
-        // 存入redis
-        redisTemplate.opsForValue().set(token, logininfo, 30, TimeUnit.MINUTES);
-        // 将敏感信息置为空
-        logininfo.setSalt("");
-        logininfo.setPassword("");
+
+        return getLoginJwtMap(logininfo);
+    }
+
+    /**
+    * @Title: getLoginJwtMap
+    * @Description: 根据登录信息返回用户信息和权限的Jwt
+    * @Author: Lynn
+    * @Version: 1.0
+    * @Date:  2022/7/14 17:25
+    * @Parameters: [logininfo]
+    * @Return java.util.Map<java.lang.String,java.lang.Object>
+    */
+    public Map<String, Object> getLoginJwtMap(Logininfo logininfo){
         // 将数据保存到map
         Map<String, Object> map = new HashMap<>();
+        // 保存到UserInfo中
+        UserInfo userInfo = new UserInfo();
+        if(logininfo.getType() == 0){
+            Long logininfoId = logininfo.getId();
+            List<String> permissions = permissionMapper.loadPermissionByLogininfoId(logininfoId);
+            List<Menu> menus = menuMapper.loadMenuByLogininfoId(logininfoId);
+
+            map.put("permissions",permissions);
+            map.put("menus",menus);
+
+            userInfo.setPermissions(permissions);
+            userInfo.setMenus(menus);
+        }
+        userInfo.setLogininfo(logininfo);
+        // 获取JWTtoken
+        // 获取私钥
+        PrivateKey privateKey = RsaUtils.getPrivateKey(JwtUtils.class.getClassLoader().getResource(jwtRsaPri).getFile());
+        String token = JwtUtils.generateTokenExpireInMinutes(userInfo, privateKey, 30);
+
+        logininfo.setSalt("");
+        logininfo.setPassword("");
         map.put("token", token);
         map.put("logininfo", logininfo);
         return map;
@@ -108,25 +165,10 @@ public class LoginServiceImpl implements ILoginService {
         if(!phoneCodeTmp.equals(phoneCode)){
             throw new BusinessException("验证码错误！请从新输入！");
         }
-        // 验证码正确
-        // 生成UUID
-        String token = UUID.randomUUID().toString();
-        // 存入redis
-        redisTemplate.opsForValue().set(token, logininfo, 30, TimeUnit.MINUTES);
-        // 将敏感信息置为空
-        logininfo.setSalt("");
-        logininfo.setPassword("");
-        // 将数据保存到map
-        Map<String, Object> map = new HashMap<>();
-        map.put("token", token);
-        map.put("logininfo", logininfo);
-        return map;
+
+        return getLoginJwtMap(logininfo);
     }
 
-    @Override
-    public void quit(String token) {
-        redisTemplate.opsForValue().set(token,"",1,TimeUnit.SECONDS);
-    }
 
     /**
     * @Title: wechatLogin
@@ -157,17 +199,11 @@ public class LoginServiceImpl implements ILoginService {
         // 判断wxuser是否存在
         if(wxuser != null && wxuser.getUserId() != null){ // wxuser存在且绑定了userID
             Logininfo logininfo = logininfoMapper.loadByUserId(wxuser.getUserId());
-            String token = UUID.randomUUID().toString();
-            // 存入redis
-            redisTemplate.opsForValue().set(token, logininfo, 30, TimeUnit.MINUTES);
-            // 将敏感信息置为空
-            logininfo.setSalt("");
-            logininfo.setPassword("");
-            // 将数据保存到map
-            Map<String, Object> map = new HashMap<>();
-            map.put("token", token);
-            map.put("logininfo", logininfo);
-            return AjaxResult.getAjaxResult().setResultObj(map);
+
+            // 将数据放入jwt
+            Map<String, Object> loginJwtMap = getLoginJwtMap(logininfo);
+            return AjaxResult.getAjaxResult().setResultObj(loginJwtMap);
+
         }
         // 如果不存在则返回失败result并返回两个参数
         StringBuffer prpamStr = new StringBuffer().append("?accessToken=")
@@ -241,19 +277,19 @@ public class LoginServiceImpl implements ILoginService {
         wxuser.setUserId(user.getId());
         wxuserMapper.save(wxuser);
 
-
-        String token = UUID.randomUUID().toString();
-        // 存入redis
-        redisTemplate.opsForValue().set(token, logininfo, 30, TimeUnit.MINUTES);
-        // 将敏感信息置为空
-        logininfo.setSalt("");
-        logininfo.setPassword("");
-        // 将数据保存到map
-        Map<String, Object> map = new HashMap<>();
-        map.put("token", token);
-        map.put("logininfo", logininfo);
-        return map;
+        // 将数据放入jwt
+        return getLoginJwtMap(logininfo);
     }
+
+    /**
+    * @Title: phone2User
+    * @Description: 根据电话号码初始化user
+    * @Author: Lynn
+    * @Version: 1.0
+    * @Date:  2022/7/14 17:29
+    * @Parameters: [phone]
+    * @Return cn.raths.user.domain.User
+    */
     private User phone2User(String phone) {
         User user = new User();
         user.setUsername(phone);

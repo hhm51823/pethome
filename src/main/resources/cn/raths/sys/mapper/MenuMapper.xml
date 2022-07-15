@@ -1,6 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.raths.sys.mapper.MenuMapper">
+
+    <resultMap id="menuResultMap" type="Menu">
+        <id column="pId" property="id" />
+        <result column="pName" property="name" />
+        <result column="pIcon" property="icon" />
+        <collection property="children" ofType="Menu">
+            <id column="id" property="id" />
+            <result column="name" property="name" />
+            <result column="component" property="component" />
+            <result column="url" property="url" />
+            <result column="icon" property="icon" />
+            <result column="index" property="index" />
+            <result column="parent_id" property="parentId" />
+            <result column="intro" property="intro" />
+            <result column="state" property="state" />
+            <result column="dirPath" property="dirPath" />
+        </collection>
+    </resultMap>
+
     <!--保存对象-->
     <insert id="save" parameterType="Menu" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         insert into t_menu(
@@ -104,5 +123,15 @@
 id,
         name, component, url, icon, index, parent_id, intro, state
     </sql>
+
+    <select id="loadMenuByLogininfoId" resultMap="menuResultMap">
+        select parent.id pId, parent.name pName, parent.icon pIcon,tm.* from t_employee te
+            join t_employee_role ter on te.id = ter.employee_id
+            join t_role_menu trm on trm.role_id = ter.role_id
+            join t_menu tm on trm.menu_id = tm.id
+            join t_menu parent on parent.id = tm.parent_id
+        where te.logininfo_id = #{logininfoId}
+        order by parent.index
+    </select>
 
 </mapper>

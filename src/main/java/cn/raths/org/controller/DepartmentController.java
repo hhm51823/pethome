@@ -64,7 +64,7 @@ public class DepartmentController {
     */
     @PutMapping
     @ApiOperation(value = "新增或修改部门")
-    @PreAuthorize(name = "删除或修改部门", sn = "department:saveOrUpt")
+    @PreAuthorize(name = "新增或修改部门", sn = "department:saveOrUpt")
     public AjaxResult addOrUpt(@ApiParam(value="部门对象",required = true) @RequestBody Department department){
         try {
             if(department.getId() == null){

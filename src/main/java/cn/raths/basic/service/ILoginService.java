@@ -13,8 +13,6 @@ public interface ILoginService {
 
     Map<String, Object> phoneCodeLogin(PhoneCodeLoginDto phoneCodeLoginDto);
 
-    void quit(String token);
-
     AjaxResult wechatLogin(WechatCodeDto wechatCodeDto);
 
     Map<String, Object> binder(WeChatBindDto weChatBindDto);
