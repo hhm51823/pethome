@@ -1,8 +1,8 @@
-package ${package.Controller};
+package cn.raths.pet.controller;
 
-import ${package.Service}.${table.serviceName};
-import ${package.Entity}.${entity};
-import ${cfg.parent}.query.${entity}Query;
+import cn.raths.pet.service.IPetOnlineAuditLogService;
+import cn.raths.pet.domain.PetOnlineAuditLog;
+import cn.raths.pet.query.PetOnlineAuditLogQuery;
 import cn.raths.basic.utils.AjaxResult;
 import cn.raths.basic.utils.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,24 +11,24 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/${table.entityPath}")
-public class ${entity}Controller {
+@RequestMapping("/petOnlineAuditLog")
+public class PetOnlineAuditLogController {
     @Autowired
-    public ${table.serviceName} ${table.entityPath}Service;
+    public IPetOnlineAuditLogService petOnlineAuditLogService;
 
 
     /**
      * 保存和修改公用的
-     * @param ${table.entityPath}  传递的实体
+     * @param petOnlineAuditLog  传递的实体
      * @return Ajaxresult转换结果
      */
     @PutMapping
-    public AjaxResult addOrUpdate(@RequestBody ${entity} ${table.entityPath}){
+    public AjaxResult addOrUpdate(@RequestBody PetOnlineAuditLog petOnlineAuditLog){
         try {
-            if( ${table.entityPath}.getId()!=null)
-                ${table.entityPath}Service.update(${table.entityPath});
+            if( petOnlineAuditLog.getId()!=null)
+                petOnlineAuditLogService.update(petOnlineAuditLog);
             else
-                ${table.entityPath}Service.save(${table.entityPath});
+                petOnlineAuditLogService.save(petOnlineAuditLog);
             return AjaxResult.getAjaxResult();
         } catch (Exception e) {
             e.printStackTrace();
@@ -43,7 +43,7 @@ public class ${entity}Controller {
     @DeleteMapping(value="/{id}")
     public AjaxResult delete(@PathVariable("id") Long id){
         try {
-            ${table.entityPath}Service.remove(id);
+            petOnlineAuditLogService.remove(id);
             return AjaxResult.getAjaxResult();
         } catch (Exception e) {
         e.printStackTrace();
@@ -53,9 +53,9 @@ public class ${entity}Controller {
 	
     //获取用户
     @GetMapping("/{id}")
-    public ${entity} get(@PathVariable("id")Long id)
+    public PetOnlineAuditLog get(@PathVariable("id")Long id)
     {
-        return ${table.entityPath}Service.loadById(id);
+        return petOnlineAuditLogService.loadById(id);
     }
 
 
@@ -64,9 +64,9 @@ public class ${entity}Controller {
     * @return
     */
     @GetMapping()
-    public List<${entity}> list(){
+    public List<PetOnlineAuditLog> list(){
 
-        return ${table.entityPath}Service.loadAll();
+        return petOnlineAuditLogService.loadAll();
     }
 
 
@@ -76,9 +76,9 @@ public class ${entity}Controller {
     * @param query 查询对象
     * @return PageList 分页对象
     */
-    @PostMapping()
-    public PageList<${entity}> json(@RequestBody ${entity}Query query)
+    @PostMapping("/list")
+    public PageList<PetOnlineAuditLog> json(@RequestBody PetOnlineAuditLogQuery query)
     {
-        return ${table.entityPath}Service.queryList(query);
+        return petOnlineAuditLogService.queryList(query);
     }
 }

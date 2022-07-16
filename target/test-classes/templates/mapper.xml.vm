@@ -63,7 +63,7 @@
     <select id="queryList" parameterType="${entity}Query" resultType="${entity}">
         select * from ${table.name}
         <include refid="whereSql"/>
-        limit #{start},#{pageSize}
+        limit #{begin},#{pageSize}
     </select>
 
 

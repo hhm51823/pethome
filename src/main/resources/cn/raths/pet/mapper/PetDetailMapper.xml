@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.raths.pet.mapper.PetDetailMapper">
+    <!--保存对象-->
+    <insert id="save" parameterType="PetDetail" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into t_pet_detail(
+                            pet_id,
+                            adoptNotice,
+                            intro
+        ) values(
+                #{petId},
+                #{adoptNotice},
+                #{intro}        )
+    </insert>
+    <!--删除对象-->
+    <delete id="remove" parameterType="long">
+        delete from t_pet_detail where id = #{id}
+    </delete>
+    <!--根据petid删除对象-->
+    <delete id="removeByPetId" parameterType="long">
+        delete from t_pet_detail where pet_id = #{petId}
+    </delete>
+
+    <!--更新对象-->
+    <update id="update" parameterType="PetDetail">
+        update t_pet_detail
+        set
+
+                            pet_id = #{petId},
+                            adoptNotice = #{adoptNotice},
+                            intro = #{intro}        where id = #{id}
+    </update>
+    <!--加载对象-->
+    <select id="loadById" resultType="PetDetail" parameterType="long">
+        select * from t_pet_detail where id = #{id}
+    </select>
+    <!--加载所有对象-->
+    <select id="loadAll" resultType="PetDetail">
+        select * from t_pet_detail
+    </select>
+    <!--根据petid查询-->
+    <select id="loadByPetId" resultType="PetDetail">
+        select * from t_pet_detail where pet_id = #{petId}
+    </select>
+    <!--//查询总数=参数（查询对象），返回值：long-->
+    <select id="queryCount" parameterType="PetDetailQuery" resultType="int">
+        select count(id) from t_pet_detail
+        <include refid="whereSql"/>
+    </select>
+    <!--//查询当前页数据=参数（查询对象），返回值:List-->
+    <select id="queryList" parameterType="PetDetailQuery" resultType="PetDetail">
+        select * from t_pet_detail
+        <include refid="whereSql"/>
+        limit #{begin},#{pageSize}
+    </select>
+
+
+    <sql id="whereSql">
+        <where>
+            <if test="keyword!=null and keyword!=''">
+                and (name like concat('%',#{keyword},'%'))
+            </if>
+        </where>
+    </sql>
+
+    <!--//批量删除-->
+    <delete id="patchDel" parameterType="arraylist">
+        delete from t_pet_detail where id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.raths.pet.domain.PetDetail">
+    <result column="id" property="id" />
+        <result column="pet_id" property="petId" />
+        <result column="adoptNotice" property="adoptNotice" />
+        <result column="intro" property="intro" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+id,
+        pet_id, adoptNotice, intro
+    </sql>
+
+</mapper>

@@ -1,34 +1,36 @@
-package ${package.Controller};
+package cn.raths.pet.controller;
 
-import ${package.Service}.${table.serviceName};
-import ${package.Entity}.${entity};
-import ${cfg.parent}.query.${entity}Query;
+import cn.raths.org.domain.Department;
+import cn.raths.pet.service.IPetTypeService;
+import cn.raths.pet.domain.PetType;
+import cn.raths.pet.query.PetTypeQuery;
 import cn.raths.basic.utils.AjaxResult;
 import cn.raths.basic.utils.PageList;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/${table.entityPath}")
-public class ${entity}Controller {
+@RequestMapping("/petType")
+public class PetTypeController {
     @Autowired
-    public ${table.serviceName} ${table.entityPath}Service;
+    public IPetTypeService petTypeService;
 
 
     /**
      * 保存和修改公用的
-     * @param ${table.entityPath}  传递的实体
+     * @param petType  传递的实体
      * @return Ajaxresult转换结果
      */
     @PutMapping
-    public AjaxResult addOrUpdate(@RequestBody ${entity} ${table.entityPath}){
+    public AjaxResult addOrUpdate(@RequestBody PetType petType){
         try {
-            if( ${table.entityPath}.getId()!=null)
-                ${table.entityPath}Service.update(${table.entityPath});
+            if( petType.getId()!=null)
+                petTypeService.update(petType);
             else
-                ${table.entityPath}Service.save(${table.entityPath});
+                petTypeService.save(petType);
             return AjaxResult.getAjaxResult();
         } catch (Exception e) {
             e.printStackTrace();
@@ -43,7 +45,7 @@ public class ${entity}Controller {
     @DeleteMapping(value="/{id}")
     public AjaxResult delete(@PathVariable("id") Long id){
         try {
-            ${table.entityPath}Service.remove(id);
+            petTypeService.remove(id);
             return AjaxResult.getAjaxResult();
         } catch (Exception e) {
         e.printStackTrace();
@@ -53,9 +55,9 @@ public class ${entity}Controller {
 	
     //获取用户
     @GetMapping("/{id}")
-    public ${entity} get(@PathVariable("id")Long id)
+    public PetType get(@PathVariable("id")Long id)
     {
-        return ${table.entityPath}Service.loadById(id);
+        return petTypeService.loadById(id);
     }
 
 
@@ -64,9 +66,9 @@ public class ${entity}Controller {
     * @return
     */
     @GetMapping()
-    public List<${entity}> list(){
+    public List<PetType> list(){
 
-        return ${table.entityPath}Service.loadAll();
+        return petTypeService.loadAll();
     }
 
 
@@ -76,9 +78,15 @@ public class ${entity}Controller {
     * @param query 查询对象
     * @return PageList 分页对象
     */
-    @PostMapping()
-    public PageList<${entity}> json(@RequestBody ${entity}Query query)
+    @PostMapping("/list")
+    public PageList<PetType> json(@RequestBody PetTypeQuery query)
     {
-        return ${table.entityPath}Service.queryList(query);
+        return petTypeService.queryList(query);
+
+    }
+
+    @GetMapping("/tree")
+    public List<PetType> loadTree(){
+        return petTypeService.loadTree();
     }
 }

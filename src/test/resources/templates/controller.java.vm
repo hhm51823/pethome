@@ -76,7 +76,7 @@ public class ${entity}Controller {
     * @param query 查询对象
     * @return PageList 分页对象
     */
-    @PostMapping("/list")
+    @PostMapping()
     public PageList<${entity}> json(@RequestBody ${entity}Query query)
     {
         return ${table.entityPath}Service.queryList(query);

@@ -21,7 +21,7 @@ public class PermissionScanInitListener implements ServletContextListener {
         // 主动打印日志
         log.info("contextInitialized start....");
         // 创建一个新的线程，避免耗费主线程的太多时间，影响项目启动速度
-        new Thread(() -> permissionScanService.scanPermission()).start();
+        //new Thread(() -> permissionScanService.scanPermission()).start();
         log.info("contextInitialized stop....");
     }
 

@@ -6,11 +6,14 @@ import cn.raths.basic.exception.BusinessException;
 import cn.raths.basic.jwt.JwtUtils;
 import cn.raths.basic.jwt.RsaUtils;
 import cn.raths.basic.jwt.UserInfo;
+import cn.raths.basic.loginInfoMsg.LoginInfoMsg;
 import cn.raths.basic.service.ILoginService;
 import cn.raths.basic.utils.AjaxResult;
 import cn.raths.basic.utils.HttpUtil;
 import cn.raths.basic.utils.MD5Utils;
 import cn.raths.basic.utils.StrUtils;
+import cn.raths.org.domain.Employee;
+import cn.raths.org.mapper.EmployeeMapper;
 import cn.raths.sys.domain.Menu;
 import cn.raths.sys.mapper.MenuMapper;
 import cn.raths.sys.mapper.PermissionMapper;
@@ -46,6 +49,9 @@ public class LoginServiceImpl implements ILoginService {
 
     @Autowired
     private LogininfoMapper logininfoMapper;
+
+    @Autowired
+    private EmployeeMapper employeeMapper;
 
     @Autowired
     private RedisTemplate redisTemplate;
@@ -111,6 +117,11 @@ public class LoginServiceImpl implements ILoginService {
     * @Return java.util.Map<java.lang.String,java.lang.Object>
     */
     public Map<String, Object> getLoginJwtMap(Logininfo logininfo){
+
+        Employee employee = employeeMapper.loadByUsername(logininfo.getUsername());
+        // 保存登录信息
+        LoginInfoMsg.INSTANCE.setEmployee(employee);
+
         // 将数据保存到map
         Map<String, Object> map = new HashMap<>();
         // 保存到UserInfo中
@@ -130,7 +141,7 @@ public class LoginServiceImpl implements ILoginService {
         // 获取JWTtoken
         // 获取私钥
         PrivateKey privateKey = RsaUtils.getPrivateKey(JwtUtils.class.getClassLoader().getResource(jwtRsaPri).getFile());
-        String token = JwtUtils.generateTokenExpireInMinutes(userInfo, privateKey, 30);
+        String token = JwtUtils.generateTokenExpireInMinutes(userInfo, privateKey, 3000);
 
         logininfo.setSalt("");
         logininfo.setPassword("");

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.raths.pet.mapper.PetMapper">
+
+    <resultMap id="queryListResultMap" type="Pet">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="costprice" property="costprice" />
+        <result column="saleprice" property="saleprice" />
+        <result column="type_id" property="typeId" />
+        <result column="resources" property="resources" />
+        <result column="state" property="state" />
+        <result column="offsaletime" property="offsaletime" />
+        <result column="onsaletime" property="onsaletime" />
+        <result column="createtime" property="createtime" />
+        <result column="shop_id" property="shopId" />
+        <result column="user_id" property="userId" />
+        <result column="search_master_msg_id" property="searchMasterMsgId" />
+        <association property="type" javaType="PetType">
+            <id column="tptId" property="id" />
+            <result column="tptName" property="name" />
+            <result column="tptDirPath" property="dirPath" />
+        </association>
+        <association property="shop" javaType="Shop">
+            <id column="tsId" property="id" />
+            <result column="tsName" property="name" />
+        </association>
+    </resultMap>
+
+    <!--保存对象-->
+    <insert id="save" parameterType="Pet" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into t_pet(
+                            name,
+                            costprice,
+                            saleprice,
+                            type_id,
+                            resources,
+                            state,
+                            offsaletime,
+                            onsaletime,
+                            createtime,
+                            shop_id,
+                            user_id,
+                            search_master_msg_id
+        ) values(
+                #{name},
+                #{costprice},
+                #{saleprice},
+                #{typeId},
+                #{resources},
+                #{state},
+                #{offsaletime},
+                #{onsaletime},
+                #{createtime},
+                #{shopId},
+                #{userId},
+                #{searchMasterMsgId}        )
+    </insert>
+    <!--删除对象-->
+    <delete id="remove" parameterType="long">
+        delete from t_pet where id = #{id}
+    </delete>
+
+    <!--更新对象-->
+    <update id="update" parameterType="Pet">
+        update t_pet
+        set
+
+                            name = #{name},
+                            costprice = #{costprice},
+                            saleprice = #{saleprice},
+                            type_id = #{typeId},
+                            resources = #{resources},
+                            state = #{state},
+                            offsaletime = #{offsaletime},
+                            onsaletime = #{onsaletime},
+                            createtime = #{createtime},
+                            shop_id = #{shopId},
+                            user_id = #{userId},
+                            search_master_msg_id = #{searchMasterMsgId}        where id = #{id}
+    </update>
+    <!--加载对象-->
+    <select id="loadById" resultType="Pet" parameterType="long">
+        select * from t_pet where id = #{id}
+    </select>
+    <!--加载所有对象-->
+    <select id="loadAll" resultType="Pet">
+        select * from t_pet
+    </select>
+    <!--//查询总数=参数（查询对象），返回值：long-->
+    <select id="queryCount" parameterType="PetQuery" resultType="int">
+        select count(tp.id) from t_pet tp
+        <include refid="whereSql"/>
+    </select>
+    <!--//查询当前页数据=参数（查询对象），返回值:List-->
+    <select id="queryList" resultMap="queryListResultMap">
+        select tp.*, tpt.id tptId,tpt.name tptName,tpt.dirPath tptDirPath, ts.id tsId, ts.name tsName from t_pet tp
+        join t_pet_type tpt on tp.type_id = tpt.id
+        join t_shop ts on ts.id = tp.shop_id
+        <include refid="whereSql"/>
+        limit #{begin},#{pageSize}
+    </select>
+
+
+    <sql id="whereSql">
+        <where>
+            <if test="keyword!=null and keyword!=''">
+                and (tp.name like concat('%',#{keyword},'%'))
+            </if>
+            <if test="shopId != null">
+                and tp.shop_id = #{shopId}
+            </if>
+        </where>
+    </sql>
+
+    <!--//批量删除-->
+    <delete id="patchDel" parameterType="arraylist">
+        delete from t_pet where id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.raths.pet.domain.Pet">
+        <result column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="costprice" property="costprice" />
+        <result column="saleprice" property="saleprice" />
+        <result column="type_id" property="typeId" />
+        <result column="resources" property="resources" />
+        <result column="state" property="state" />
+        <result column="offsaletime" property="offsaletime" />
+        <result column="onsaletime" property="onsaletime" />
+        <result column="createtime" property="createtime" />
+        <result column="shop_id" property="shopId" />
+        <result column="user_id" property="userId" />
+        <result column="search_master_msg_id" property="searchMasterMsgId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+id,
+        name, costprice, saleprice, type_id, resources, state, offsaletime, onsaletime, createtime, shop_id, user_id, search_master_msg_id
+    </sql>
+
+    <update id="offsale">
+        update t_pet set state = 0, offsaletime = DATE_FORMAT(now(),'%Y-%c-%d %h:%i:%s')
+            where id in
+            <foreach collection="list" item="id" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+            and state = 1
+    </update>
+
+    <update id="onsale">
+        update t_pet set state = 1, onsaletime = DATE_FORMAT(now(),'%Y-%c-%d %h:%i:%s')
+            where id in
+            <foreach collection="list" item="id" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+            and state = 0
+    </update>
+
+</mapper>

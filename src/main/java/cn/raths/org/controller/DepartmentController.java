@@ -1,7 +1,9 @@
 package cn.raths.org.controller;
 
 import cn.raths.basic.annotation.PreAuthorize;
+import cn.raths.basic.jwt.UserInfo;
 import cn.raths.basic.utils.AjaxResult;
+import cn.raths.basic.utils.LoginContext;
 import cn.raths.basic.utils.PageList;
 import cn.raths.org.domain.Department;
 import cn.raths.org.query.DepartmentQuery;
@@ -12,6 +14,7 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -113,7 +116,10 @@ public class DepartmentController {
     @PostMapping
     @ApiOperation(value = "高级查询")
     @PreAuthorize(name = "部门高级查询列表", sn = "department:list")
-    public PageList<Department> queryList(@ApiParam(value="高级查询条件对象",required = true) @RequestBody DepartmentQuery departmentQuery){
+    public PageList<Department> queryList(@ApiParam(value="高级查询条件对象",required = true) @RequestBody DepartmentQuery departmentQuery, HttpServletRequest request){
+        UserInfo loginUser = LoginContext.getLoginUser(request);
+        System.out.println(loginUser.getLogininfo());
+
         return departmentService.queryList(departmentQuery);
     }
 

@@ -19,6 +19,7 @@ public class InterceptorConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/login/**") // 放行路径
                 .excludePathPatterns("/baiduAudit/**")
                 .excludePathPatterns("/fastdfs/**")
+                .excludePathPatterns("/fastdfs")
                 .excludePathPatterns("/verifyCode/**")
                 .excludePathPatterns("/user/register/**")
                 .excludePathPatterns("/shop/settlement")
