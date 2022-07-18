@@ -55,7 +55,6 @@ public class PetServiceImpl extends BaseServiceImpl<Pet> implements IPetService 
 
     @Override
     public void save(Pet pet) {
-        pet.setShopId(LoginInfoMsg.INSTANCE.getEmployee().getShopId());
         petMapper.save(pet);
         PetDetail detail = pet.getDetail();
         detail.setPetId(pet.getId());

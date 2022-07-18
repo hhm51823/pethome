@@ -44,5 +44,20 @@ public class LoginContext {
         return payload.getUserInfo();
     }
 
+    /**
+    * @Title: getEmpployee
+    * @Description: TODO
+    * @Author: Lynn
+    * @Version: 1.0
+    * @Date:  2022/7/17 8:22
+    * @Parameters: [request]
+    * @Return cn.raths.basic.jwt.UserInfo
+    */
+    public static UserInfo getEmpployee(HttpServletRequest request){
+        UserInfo loginUser = getLoginUser(request);
+        // TODO
+        return null;
+    }
+
 
 }

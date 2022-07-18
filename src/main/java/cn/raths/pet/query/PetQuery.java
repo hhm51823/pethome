@@ -1,6 +1,5 @@
 package cn.raths.pet.query;
 import cn.raths.basic.query.BaseQuery;
-import cn.raths.org.domain.Employee;
 import lombok.Data;
 
 /**
@@ -11,4 +10,5 @@ import lombok.Data;
 @Data
 public class PetQuery extends BaseQuery{
     private Long shopId;
+    private Integer state;
 }

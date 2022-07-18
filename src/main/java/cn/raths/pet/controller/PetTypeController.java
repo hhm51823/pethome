@@ -1,5 +1,6 @@
 package cn.raths.pet.controller;
 
+import cn.raths.basic.annotation.PreAuthorize;
 import cn.raths.org.domain.Department;
 import cn.raths.pet.service.IPetTypeService;
 import cn.raths.pet.domain.PetType;
@@ -7,6 +8,7 @@ import cn.raths.pet.query.PetTypeQuery;
 import cn.raths.basic.utils.AjaxResult;
 import cn.raths.basic.utils.PageList;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -84,6 +86,18 @@ public class PetTypeController {
         return petTypeService.queryList(query);
 
     }
+
+    @PatchMapping
+    public AjaxResult patchDel(@RequestBody Long[] ids){
+        try {
+            petTypeService.patchDel(ids);
+            return AjaxResult.getAjaxResult();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.error();
+        }
+    }
+
 
     @GetMapping("/tree")
     public List<PetType> loadTree(){

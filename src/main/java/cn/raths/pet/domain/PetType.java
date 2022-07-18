@@ -29,6 +29,8 @@ public class PetType extends BaseDomain{
      */
     private Long pid;
 
+    private PetType parent;
+
     // 数据不为null则返回json数据，为null则不返回
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<PetType> children = new ArrayList<>();

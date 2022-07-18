@@ -1,0 +1,111 @@
+
+前端宠物展示
+    准备商品展示页面。根据妹子UI中的商品页面修改
+
+    页面需要实现分页和查询功能，后端有这个接口。但是我们只能展示状态为上架的宠物。
+        数据展示：
+            1，导入Axios和Vue
+            2，准备挂载节点
+            3，创建VUE对象
+            4，创建高级查询模型层对象，在高级查询对象中添加窗台属性设置默认值为1：即状态为上架。在后端进行相应的修改
+                因为这个参数只有前端会传，并不影响后端，只需在条件语句中多加一个字段判断即可
+            5，使用胡须表达式或属性绑定将查询到的数据展示到页面
+                循环列表标签展示宠物图片，价格，店铺等信息
+
+            注意：展示图片室友特殊需求的尺寸为800X800，所以需要重新尊卑数据库的数据
+
+        造假数据
+            先在清空数据库表：
+                TRUNCATE TABLE 表名
+                该语句能清空数据表的所有信息，并能将自增字段清空
+
+            先在数据库中添加一条数据（因为要展示宠物详情，宠物图片多添加几张）
+            编写测试类：
+                1，将数据库中唯一的一条数据查出来
+                1.5，将ID置为空
+                2，随机修改必要属性以便于区分数据
+                3，循环第二步，并将修改后的对象保存到数据库，需要多少条就循环多少次
+
+        宠物查询：
+            将页面中的搜索框绑定到模型层查询对象的keyword上
+            将搜索按钮type属性改为button,并绑定事件，将页码初始化为1，从新查询数据库
+
+        基础分页：
+            页码动态展示，根据查询到的总条数除以每页展示条数向上取整。
+            用v-for来做。
+            给循环的标签通过@click来绑定事件，将当前页码传入
+            函数中将传入的页码赋值给高级查询对象的currentPage属性中
+            从新查询数据库
+
+            上一页，下一页的做法：
+                上一页：只需绑定刚才的点击页码的事件，将当前currentPage减一传入即可
+                下一页：只需绑定刚才的点击页码的事件，将当前currentPage加一传入即可
+
+            注意：点击页码函数中需判断传入的页码是否合法。即大于等于1，且小于等于最大页码
+
+    宠物详情展示：
+
+        1，在展示的商品li标签使用@click绑定事件，将pet.id 传入
+        2，在函数中，将id作为URL参数拼接到URL中，跳转到宠物详情中
+            window.open("petDetail.html?petId=" + petId); // 打开新的页面
+
+        详情页面：
+            展示须知：
+                fastdfs能通过拼接尺寸提供缩略图。
+                如：展示60X60的缩略图只需，在fastdfs访问路径最后拼接_60x60即可
+
+            详情页需要三个尺寸的图片，60x60、350x350、原图800X800
+
+            1，引入Axios和Vue
+            2，创建Vue
+                。。。
+            3，在钩子函数中调用公共方法截取petid
+            4，根据petid查询数据库数据。
+                后端需修改获取单条数据的SQL
+            5，展示店铺，名称，宠物简介，宠物详情
+
+            6，图片展示：
+                分割resources属性得到resources数组
+                循环数组，设置图片属性
+                   <li v-for="(resource,index) in resources">
+                     <div class="tb-pic tb-s40 tb-selected" v-if="index==0">
+                        <a href="#"><img :src="fastDfsUrl+resource+smallimgSuffix" :mid="fastDfsUrl+resource+midimgSuffix" :big="fastDfsUrl+resource"></a>
+                     </div>
+                     <div class="tb-pic tb-s40" v-else>
+                        <a href="#"><img :src="fastDfsUrl+resource+smallimgSuffix" :mid="fastDfsUrl+resource+midimgSuffix" :big="fastDfsUrl+resource"></a>
+                     </div>
+                  </li>
+
+                大图展示：
+                   <a :href="fastDfsUrl+resources[0]">
+                      <img :src="fastDfsUrl+resources[0]+midimgSuffix" alt="细节展示放大镜特效" :rel="fastDfsUrl+resources[0]" class="jqzoom" />
+                   </a>
+
+                参数说明：
+                    resources：分割resources属性得到resources数组
+                    fastDfsUrl：fastdfs访问前缀
+                    midimgSuffix:"_350x350" 缩略图后缀
+                    smallimgSuffix:"_60x60" 缩略图后缀
+
+    Freemarker模板引擎：
+        模板引擎就是一种使用数据+模板生成静态化页面的技术，也叫页面静态化技术
+        页面静态化是以空间换时间的方式，在添加和修改对象时就生成静态页面，访问时实际访问的是一个静态页面
+        页面静态化技术降低查询数据库的次数，减轻数据库的压力，提高了访问效率，进一步提高了用户体验度
+
+        页面静态化技术有：Jsp、Thymeleaf、Freemarker、Velocity
+
+        Thymeleaf：
+            全称：FreeMarker Template Language (FTL)，所以FreeMarker 的模板是以.ftl为后缀的
+
+            使用：
+                1，导入依赖
+                2，yml配置相关参数
+                3，准备生成的静态页面的存放路径
+                4，准备一个模板放入到resources的templates中
+                5，编辑模板。
+                    Freemarker模板引擎会根据 对象数据+模板在指定的位置生成静态页面
+                    模板中直接使用El表达式取值即可
+                6，查询数据，使用freemarker核心对象生成静态页面
+
+
+

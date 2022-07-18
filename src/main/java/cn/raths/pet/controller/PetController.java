@@ -1,9 +1,13 @@
 package cn.raths.pet.controller;
 
 import cn.raths.basic.exception.BusinessException;
+import cn.raths.basic.jwt.UserInfo;
 import cn.raths.basic.loginInfoMsg.LoginInfoMsg;
 import cn.raths.basic.utils.AjaxResult;
+import cn.raths.basic.utils.LoginContext;
 import cn.raths.basic.utils.PageList;
+import cn.raths.org.domain.Employee;
+import cn.raths.org.service.IEmployeeService;
 import cn.raths.pet.domain.Pet;
 import cn.raths.pet.domain.PetDetail;
 import cn.raths.pet.query.PetQuery;
@@ -11,6 +15,7 @@ import cn.raths.pet.service.IPetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -19,6 +24,9 @@ public class PetController {
     @Autowired
     public IPetService petService;
 
+    @Autowired
+    public IEmployeeService employeeService;
+
 
     /**
      * 保存和修改公用的
@@ -26,12 +34,16 @@ public class PetController {
      * @return Ajaxresult转换结果
      */
     @PutMapping
-    public AjaxResult addOrUpdate(@RequestBody Pet pet){
+    public AjaxResult addOrUpdate(@RequestBody Pet pet,HttpServletRequest request){
         try {
-            if( pet.getId()!=null)
+            if( pet.getId()!=null) {
                 petService.update(pet);
-            else
+            }else {
+                UserInfo loginUser = LoginContext.getLoginUser(request);
+                Employee employee = employeeService.loadByLogininfoId(loginUser.getLogininfo().getId());
+                pet.setShopId(employee.getShopId());
                 petService.save(pet);
+            }
             return AjaxResult.getAjaxResult();
         } catch (Exception e) {
             e.printStackTrace();
@@ -80,10 +92,12 @@ public class PetController {
     * @return PageList 分页对象
     */
     @PostMapping
-    public PageList<Pet> json(@RequestBody PetQuery query)
+    public PageList<Pet> json(@RequestBody PetQuery query, HttpServletRequest request)
     {
-        if(LoginInfoMsg.INSTANCE.getEmployee() != null){
-            query.setShopId(LoginInfoMsg.INSTANCE.getEmployee().getShopId());
+        UserInfo loginUser = LoginContext.getLoginUser(request);
+        Employee employee = employeeService.loadByLogininfoId(loginUser.getLogininfo().getId());
+        if(employee != null){
+            query.setShopId(employee.getShopId());
         }
         return petService.queryList(query);
     }

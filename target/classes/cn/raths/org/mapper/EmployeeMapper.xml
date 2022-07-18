@@ -13,6 +13,11 @@
         select * from t_employee where id = #{id}
     </select>
 
+    <!--根据logininfoId查询-->
+    <select id="loadByLogininfoId" resultType="Employee">
+        select * from t_employee where logininfo_id = #{logininfoId}
+    </select>
+
     <!--根据username查询-->
     <select id="loadByUsername" resultType="Employee">
         select * from t_employee where username = #{username}

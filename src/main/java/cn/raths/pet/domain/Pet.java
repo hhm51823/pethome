@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import cn.raths.basic.domain.BaseDomain;
 import cn.raths.org.domain.Shop;
+import cn.raths.user.domain.User;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
@@ -51,4 +52,5 @@ public class Pet extends BaseDomain{
 
     private PetType type;
     private Shop shop;
+    private User user;
 }

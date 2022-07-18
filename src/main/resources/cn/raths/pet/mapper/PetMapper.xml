@@ -25,6 +25,15 @@
             <id column="tsId" property="id" />
             <result column="tsName" property="name" />
         </association>
+        <association property="user" javaType="User">
+            <id column="tuId" property="id" />
+            <result column="tuUsername" property="username" />
+        </association>
+        <association property="detail" javaType="PetDetail">
+            <id column="tpdId" property="id" />
+            <result column="adoptNotice" property="adoptNotice" />
+            <result column="intro" property="intro" />
+        </association>
     </resultMap>
 
     <!--保存对象-->
@@ -80,8 +89,14 @@
                             search_master_msg_id = #{searchMasterMsgId}        where id = #{id}
     </update>
     <!--加载对象-->
-    <select id="loadById" resultType="Pet" parameterType="long">
-        select * from t_pet where id = #{id}
+    <select id="loadById" resultMap="queryListResultMap" parameterType="long">
+        select tp.*, tpt.id tptId,tpt.name tptName,tpt.dirPath tptDirPath, ts.id tsId, ts.name tsName ,tu.id tuId, tu.username tuUsername,tpd.id tpdId,tpd.adoptNotice adoptNotice,tpd.intro intro
+        from t_pet tp
+                 left join t_pet_type tpt on tp.type_id = tpt.id
+                 left join t_shop ts on ts.id = tp.shop_id
+                 left join t_user tu on tp.user_id = tu.id
+                 left join t_pet_detail tpd on tp.id = tpd.pet_id
+        where tp.id = #{id}
     </select>
     <!--加载所有对象-->
     <select id="loadAll" resultType="Pet">
@@ -94,9 +109,12 @@
     </select>
     <!--//查询当前页数据=参数（查询对象），返回值:List-->
     <select id="queryList" resultMap="queryListResultMap">
-        select tp.*, tpt.id tptId,tpt.name tptName,tpt.dirPath tptDirPath, ts.id tsId, ts.name tsName from t_pet tp
-        join t_pet_type tpt on tp.type_id = tpt.id
-        join t_shop ts on ts.id = tp.shop_id
+        select tp.*, tpt.id tptId,tpt.name tptName,tpt.dirPath tptDirPath, ts.id tsId, ts.name tsName ,tu.id tuId, tu.username tuUsername,tpd.id tpdId,tpd.adoptNotice adoptNotice,tpd.intro intro
+        from t_pet tp
+        left join t_pet_type tpt on tp.type_id = tpt.id
+        left join t_shop ts on ts.id = tp.shop_id
+        left join t_user tu on tp.user_id = tu.id
+        left join t_pet_detail tpd on tp.id = tpd.pet_id
         <include refid="whereSql"/>
         limit #{begin},#{pageSize}
     </select>
@@ -109,6 +127,9 @@
             </if>
             <if test="shopId != null">
                 and tp.shop_id = #{shopId}
+            </if>
+            <if test="state != null">
+                and tp.state = #{state}
             </if>
         </where>
     </sql>

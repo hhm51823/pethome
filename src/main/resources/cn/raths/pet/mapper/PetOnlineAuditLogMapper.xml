@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.raths.pet.mapper.PetOnlineAuditLogMapper">
+
+    <resultMap id="queryListResultMap" type="PetOnlineAuditLog">
+        <id column="id" property="id" />
+        <result column="pet_id" property="petId" />
+        <result column="state" property="state" />
+        <result column="audit_id" property="auditId" />
+        <result column="audit_time" property="auditTime" />
+        <result column="note" property="note" />
+        <association property="pet" javaType="Pet">
+            <id column="pId" property="id" />
+            <result column="pName" property="name" />
+        </association>
+    </resultMap>
+
+
     <!--保存对象-->
     <insert id="save" parameterType="PetOnlineAuditLog" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         insert into t_pet_online_audit_log(
@@ -42,12 +57,13 @@
     </select>
     <!--//查询总数=参数（查询对象），返回值：long-->
     <select id="queryCount" parameterType="PetOnlineAuditLogQuery" resultType="int">
-        select count(id) from t_pet_online_audit_log
+        select count(log.id) from t_pet_online_audit_log log
         <include refid="whereSql"/>
     </select>
     <!--//查询当前页数据=参数（查询对象），返回值:List-->
-    <select id="queryList" parameterType="PetOnlineAuditLogQuery" resultType="PetOnlineAuditLog">
-        select * from t_pet_online_audit_log
+    <select id="queryList" parameterType="PetOnlineAuditLogQuery" resultMap="queryListResultMap">
+        select log.*,p.id pId, p.name pName from t_pet_online_audit_log log
+            left join t_pet p on log.pet_id = p.id
         <include refid="whereSql"/>
         limit #{begin},#{pageSize}
     </select>
@@ -56,7 +72,7 @@
     <sql id="whereSql">
         <where>
             <if test="keyword!=null and keyword!=''">
-                and (name like concat('%',#{keyword},'%'))
+                and (log.name like concat('%',#{keyword},'%'))
             </if>
         </where>
     </sql>

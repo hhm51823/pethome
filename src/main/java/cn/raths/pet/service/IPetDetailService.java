@@ -13,4 +13,5 @@ import cn.raths.basic.service.IBaseService;
  */
 public interface IPetDetailService extends IBaseService<PetDetail> {
 
+    PetDetail loadByPetId(Long id);
 }

@@ -41,6 +41,7 @@ public class PetOnlineAuditLog extends BaseDomain{
      */
     private String note;
 
+    private Pet pet;
 
 
 }

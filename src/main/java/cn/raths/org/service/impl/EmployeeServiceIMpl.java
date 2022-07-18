@@ -89,4 +89,9 @@ public class EmployeeServiceIMpl extends BaseServiceImpl<Employee> implements IE
         logininfo.setType(0);
         return logininfo;
     }
+
+    @Override
+    public Employee loadByLogininfoId(Long logininfoId) {
+        return EmployeeMapper.loadByLogininfoId(logininfoId);
+    }
 }
