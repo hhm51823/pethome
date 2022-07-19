@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.raths.pet.mapper.SearchMasterMsgMapper">
+    <!--保存对象-->
+    <insert id="save" parameterType="SearchMasterMsg" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into t_search_master_msg(
+                            title,
+                            state,
+                            name,
+                            age,
+                            gender,
+                            coat_color,
+                            resources,
+                            pet_type,
+                            price,
+                            address,
+                            user_id,
+                            shop_id,
+                            note
+        ) values(
+                #{title},
+                #{state},
+                #{name},
+                #{age},
+                #{gender},
+                #{coatColor},
+                #{resources},
+                #{petType},
+                #{price},
+                #{address},
+                #{userId},
+                #{shopId},
+                #{note}        )
+    </insert>
+    <!--删除对象-->
+    <delete id="remove" parameterType="long">
+        delete from t_search_master_msg where id = #{id}
+    </delete>
+
+    <!--更新对象-->
+    <update id="update" parameterType="SearchMasterMsg">
+        update t_search_master_msg
+        set
+
+                            title = #{title},
+                            state = #{state},
+                            name = #{name},
+                            age = #{age},
+                            gender = #{gender},
+                            coat_color = #{coatColor},
+                            resources = #{resources},
+                            pet_type = #{petType},
+                            price = #{price},
+                            address = #{address},
+                            user_id = #{userId},
+                            shop_id = #{shopId},
+                            note = #{note}        where id = #{id}
+    </update>
+    <!--加载对象-->
+    <select id="loadById" resultType="SearchMasterMsg" parameterType="long">
+        select * from t_search_master_msg where id = #{id}
+    </select>
+    <!--加载所有对象-->
+    <select id="loadAll" resultType="SearchMasterMsg">
+        select * from t_search_master_msg
+    </select>
+    <!--//查询总数=参数（查询对象），返回值：long-->
+    <select id="queryCount" parameterType="SearchMasterMsgQuery" resultType="int">
+        select count(id) from t_search_master_msg
+        <include refid="whereSql"/>
+    </select>
+    <!--//查询当前页数据=参数（查询对象），返回值:List-->
+    <select id="queryList" parameterType="SearchMasterMsgQuery" resultType="SearchMasterMsg">
+        select * from t_search_master_msg
+        <include refid="whereSql"/>
+        limit #{begin},#{pageSize}
+    </select>
+
+
+    <sql id="whereSql">
+        <where>
+            <if test="keyword!=null and keyword!=''">
+                and (name like concat('%',#{keyword},'%'))
+            </if>
+        </where>
+    </sql>
+
+    <!--//批量删除-->
+    <delete id="patchDel" parameterType="arraylist">
+        delete from t_search_master_msg where id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.raths.pet.domain.SearchMasterMsg">
+    <result column="id" property="id" />
+        <result column="title" property="title" />
+        <result column="state" property="state" />
+        <result column="name" property="name" />
+        <result column="age" property="age" />
+        <result column="gender" property="gender" />
+        <result column="coat_color" property="coatColor" />
+        <result column="resources" property="resources" />
+        <result column="pet_type" property="petType" />
+        <result column="price" property="price" />
+        <result column="address" property="address" />
+        <result column="user_id" property="userId" />
+        <result column="shop_id" property="shopId" />
+        <result column="note" property="note" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+id,
+        title, state, name, age, gender, coat_color, resources, pet_type, price, address, user_id, shop_id, note
+    </sql>
+
+</mapper>

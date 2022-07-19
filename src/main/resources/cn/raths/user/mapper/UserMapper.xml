@@ -47,6 +47,10 @@
                             headImg = #{headImg},
                             logininfo_id = #{logininfoId}        where id = #{id}
     </update>
+    <!--根据logininfoId加载对象-->
+    <select id="loadByLogininfoId" resultType="User">
+        select * from t_user where logininfo_id = #{logininfoId}
+    </select>
     <!--加载对象-->
     <select id="loadById" resultType="User" parameterType="long">
         select * from t_user where id = #{id}

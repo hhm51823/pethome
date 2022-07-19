@@ -18,4 +18,6 @@ public interface IUserService extends IBaseService<User> {
     void registerPhone(RegisterDto registerDto);
 
     void registerEmail(EmailRegisterDto emailRegisterDto);
+
+    User loadByLogininfoId(Long id);
 }

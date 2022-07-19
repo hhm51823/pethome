@@ -18,4 +18,6 @@ public interface UserMapper extends BaseMapper<User> {
     User loadByPhone(String Phone);
 
     User loadByEamil(String email);
+
+    User loadByLogininfoId(Long logininfoId);
 }

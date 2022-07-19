@@ -175,6 +175,11 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements IUserServi
 
     }
 
+    @Override
+    public User loadByLogininfoId(Long logininfoId) {
+        return userMapper.loadByLogininfoId(logininfoId);
+    }
+
     private User emailRegisterDto2User(EmailRegisterDto emailRegisterDto) {
         User user = new User();
         user.setUsername(emailRegisterDto.getEmail());
