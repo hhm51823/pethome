@@ -13,6 +13,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class EmployeeServiceIMpl extends BaseServiceImpl<Employee> implements IEmployeeService {
 
@@ -93,5 +95,10 @@ public class EmployeeServiceIMpl extends BaseServiceImpl<Employee> implements IE
     @Override
     public Employee loadByLogininfoId(Long logininfoId) {
         return EmployeeMapper.loadByLogininfoId(logininfoId);
+    }
+
+    @Override
+    public List<Employee> loadByShopId(Long shopId) {
+        return EmployeeMapper.loadByShopId(shopId);
     }
 }

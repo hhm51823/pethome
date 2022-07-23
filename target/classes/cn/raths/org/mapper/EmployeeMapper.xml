@@ -8,6 +8,10 @@
         select * from t_employee
     </select>
 
+    <!--根据shopid查询-->
+    <select id="loadByShopId" resultType="Employee">
+        select * from t_employee where shop_id = #{shopId}
+    </select>
     <!--根据id查询-->
     <select id="loadById" resultType="Employee">
         select * from t_employee where id = #{id}

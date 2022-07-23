@@ -129,4 +129,9 @@ public class EmployeeController {
             return AjaxResult.error();
         }
     }
+
+    @GetMapping("/list/{shopId}")
+    public List<Employee> loadByShopId(@PathVariable("shopId") Long shopId){
+        return employeeService.loadByShopId(shopId);
+    }
 }

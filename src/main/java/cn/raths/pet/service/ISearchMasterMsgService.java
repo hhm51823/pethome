@@ -1,5 +1,6 @@
 package cn.raths.pet.service;
 
+import cn.raths.org.dto.HandlerMsgDto;
 import cn.raths.pet.domain.SearchMasterMsg;
 import cn.raths.basic.service.IBaseService;
 
@@ -14,4 +15,8 @@ import cn.raths.basic.service.IBaseService;
 public interface ISearchMasterMsgService extends IBaseService<SearchMasterMsg> {
 
     void publish(SearchMasterMsg searchMasterMsg);
+
+    void accept(HandlerMsgDto handlerMsgDto);
+
+    void reject(Long msgId);
 }

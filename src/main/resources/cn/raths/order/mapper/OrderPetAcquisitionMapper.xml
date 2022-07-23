@@ -54,6 +54,12 @@
                             search_master_msg_id = #{searchMasterMsgId}        where id = #{id}
     </update>
     <!--加载对象-->
+    <select id="loadByMsgId" resultType="OrderPetAcquisition">
+        select * from t_order_pet_acquisition where search_master_msg_id = #{msgId}
+                                                and <![CDATA[state != -1]]>
+    </select>
+
+    <!--加载对象-->
     <select id="loadById" resultType="OrderPetAcquisition" parameterType="long">
         select * from t_order_pet_acquisition where id = #{id}
     </select>

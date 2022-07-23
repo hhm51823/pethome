@@ -3,6 +3,8 @@ package cn.raths.pet.domain;
 import java.math.BigDecimal;
 import java.util.Date;
 import cn.raths.basic.domain.BaseDomain;
+import cn.raths.org.domain.Shop;
+import cn.raths.user.domain.User;
 import lombok.Data;
 
 /**
@@ -49,5 +51,10 @@ public class SearchMasterMsg extends BaseDomain{
     private Long shopId;
     private String note;
 
+    // 接单店铺对象
+    private Shop shop;
+
+    // 发布消息的用户
+    private User user;
 
 }

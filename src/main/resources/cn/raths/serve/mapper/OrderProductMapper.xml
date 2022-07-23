@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.raths.serve.mapper.OrderProductMapper">
+
+    <resultMap id="queryListResultMap" type="OrderProduct">
+        <id column="id" property="id" />
+        <result column="digest" property="digest" />
+        <result column="state" property="state" />
+        <result column="price" property="price" />
+        <result column="orderSn" property="orderSn" />
+        <result column="paySn" property="paySn" />
+        <result column="lastPayTime" property="lastPayTime" />
+        <result column="num" property="num" />
+        <result column="address" property="address" />
+        <result column="product_id" property="productId" />
+        <result column="user_id" property="userId" />
+        <result column="shop_id" property="shopId" />
+        <result column="employee_id" property="employeeId" />
+        <association property="user" javaType="User">
+            <id column="tuId" property="id" />
+            <result column="username" property="username" />
+        </association>
+        <association property="shop" javaType="Shop">
+            <id column="tsId" property="id" />
+            <result column="tsName" property="name" />
+        </association>
+    </resultMap>
+
+    <!--保存对象-->
+    <insert id="save" parameterType="OrderProduct" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into t_order_product(
+                            digest,
+                            state,
+                            price,
+                            orderSn,
+                            paySn,
+                            lastPayTime,
+                            num,
+                            address,
+                            product_id,
+                            user_id,
+                            shop_id,
+                            employee_id
+        ) values(
+                #{digest},
+                #{state},
+                #{price},
+                #{orderSn},
+                #{paySn},
+                #{lastPayTime},
+                #{num},
+                #{address},
+                #{productId},
+                #{userId},
+                #{shopId},
+                #{employeeId}        )
+    </insert>
+    <!--删除对象-->
+    <delete id="remove" parameterType="long">
+        delete from t_order_product where id = #{id}
+    </delete>
+
+    <!--更新对象-->
+    <update id="update" parameterType="OrderProduct">
+        update t_order_product
+        set
+
+                            digest = #{digest},
+                            state = #{state},
+                            price = #{price},
+                            orderSn = #{orderSn},
+                            paySn = #{paySn},
+                            lastPayTime = #{lastPayTime},
+                            num = #{num},
+                            address = #{address},
+                            product_id = #{productId},
+                            user_id = #{userId},
+                            shop_id = #{shopId},
+                            employee_id = #{employeeId}        where id = #{id}
+    </update>
+    <!--加载对象-->
+    <select id="loadById" resultType="OrderProduct" parameterType="long">
+        select * from t_order_product where id = #{id}
+    </select>
+    <!--加载所有对象-->
+    <select id="loadAll" resultType="OrderProduct">
+        select * from t_order_product
+    </select>
+    <!--//查询总数=参数（查询对象），返回值：long-->
+    <select id="queryCount" parameterType="OrderProductQuery" resultType="int">
+        select count(top.id) from t_order_product top
+        <include refid="whereSql"/>
+    </select>
+    <!--//查询当前页数据=参数（查询对象），返回值:List-->
+    <select id="queryList" parameterType="OrderProductQuery" resultMap="queryListResultMap">
+        select top.*,tu.id tuId,tu.username username, ts.id tsId, ts.name tsName
+            from t_order_product top
+            left join t_user tu on tu.id = top.user_id
+            left join t_shop ts on ts.id = top.shop_id
+        <include refid="whereSql"/>
+        limit #{begin},#{pageSize}
+    </select>
+
+
+    <sql id="whereSql">
+        <where>
+            <if test="keyword!=null and keyword!=''">
+                and (top.digest like concat('%',#{keyword},'%'))
+            </if>
+            <if test="state!=null">
+                <if test="state==0 and empId==null" >
+                    and top.employee_id is null
+                </if>
+                and top.state = #{state}
+            </if>
+            <if test="empId!=null">
+                and top.employee_id = #{empId}
+            </if>
+        </where>
+    </sql>
+
+    <!--//批量删除-->
+    <delete id="patchDel" parameterType="arraylist">
+        delete from t_order_product where id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.raths.serve.domain.OrderProduct">
+    <result column="id" property="id" />
+        <result column="digest" property="digest" />
+        <result column="state" property="state" />
+        <result column="price" property="price" />
+        <result column="orderSn" property="orderSn" />
+        <result column="paySn" property="paySn" />
+        <result column="lastPayTime" property="lastPayTime" />
+        <result column="num" property="num" />
+        <result column="address" property="address" />
+        <result column="product_id" property="productId" />
+        <result column="user_id" property="userId" />
+        <result column="shop_id" property="shopId" />
+        <result column="employee_id" property="employeeId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+id,
+        digest, state, price, orderSn, paySn, lastPayTime, num, address, product_id, user_id, shop_id, employee_id
+    </sql>
+
+</mapper>

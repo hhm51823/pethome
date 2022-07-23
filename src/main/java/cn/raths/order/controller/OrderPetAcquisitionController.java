@@ -1,5 +1,7 @@
 package cn.raths.order.controller;
 
+import cn.raths.basic.exception.BusinessException;
+import cn.raths.order.dto.OrderConfirmationDto;
 import cn.raths.order.service.IOrderPetAcquisitionService;
 import cn.raths.order.domain.OrderPetAcquisition;
 import cn.raths.order.query.OrderPetAcquisitionQuery;
@@ -41,9 +43,10 @@ public class OrderPetAcquisitionController {
     * @return
     */
     @DeleteMapping(value="/{id}")
-    public AjaxResult delete(@PathVariable("id") Long id){
+    public AjaxResult handleCancel(@PathVariable("id") Long id){
         try {
-            orderPetAcquisitionService.remove(id);
+            // 修改删除方法
+            orderPetAcquisitionService.handleCancel(id);
             return AjaxResult.getAjaxResult();
         } catch (Exception e) {
         e.printStackTrace();
@@ -80,5 +83,19 @@ public class OrderPetAcquisitionController {
     public PageList<OrderPetAcquisition> json(@RequestBody OrderPetAcquisitionQuery query)
     {
         return orderPetAcquisitionService.queryList(query);
+    }
+    @PostMapping("/confirm")
+    public AjaxResult confirm(@RequestBody OrderConfirmationDto orderConfirmationDto)
+    {
+        try {
+            orderPetAcquisitionService.confirm(orderConfirmationDto);
+            return AjaxResult.getAjaxResult();
+        }catch (BusinessException e) {
+            e.printStackTrace();
+            return AjaxResult.error().setMessage(e.getMessage());
+        }catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.error();
+        }
     }
 }

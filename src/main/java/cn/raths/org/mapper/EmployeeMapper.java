@@ -20,4 +20,6 @@ public interface EmployeeMapper extends BaseMapper<Employee> {
     void saveEmployeeRole(@Param("id") Long id, @Param("rIds") List<Long> menus);
 
     Employee loadByLogininfoId(Long logininfoId);
+
+    List<Employee> loadByShopId(Long shopId);
 }

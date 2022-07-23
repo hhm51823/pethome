@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.raths.serve.mapper.OrderProductLogMapper">
+    <!--保存对象-->
+    <insert id="save" parameterType="OrderProductLog" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into t_order_product_log(
+                            productOrder_id,
+                            state,
+                            audit_id,
+                            audit_time,
+                            note
+        ) values(
+                #{productorderId},
+                #{state},
+                #{auditId},
+                #{auditTime},
+                #{note}        )
+    </insert>
+    <!--删除对象-->
+    <delete id="remove" parameterType="long">
+        delete from t_order_product_log where id = #{id}
+    </delete>
+
+    <!--更新对象-->
+    <update id="update" parameterType="OrderProductLog">
+        update t_order_product_log
+        set
+
+                            productOrder_id = #{productorderId},
+                            state = #{state},
+                            audit_id = #{auditId},
+                            audit_time = #{auditTime},
+                            note = #{note}        where id = #{id}
+    </update>
+    <!--加载对象-->
+    <select id="loadById" resultType="OrderProductLog" parameterType="long">
+        select * from t_order_product_log where id = #{id}
+    </select>
+    <!--加载所有对象-->
+    <select id="loadAll" resultType="OrderProductLog">
+        select * from t_order_product_log
+    </select>
+    <!--//查询总数=参数（查询对象），返回值：long-->
+    <select id="queryCount" parameterType="OrderProductLogQuery" resultType="int">
+        select count(id) from t_order_product_log
+        <include refid="whereSql"/>
+    </select>
+    <!--//查询当前页数据=参数（查询对象），返回值:List-->
+    <select id="queryList" parameterType="OrderProductLogQuery" resultType="OrderProductLog">
+        select * from t_order_product_log
+        <include refid="whereSql"/>
+        limit #{begin},#{pageSize}
+    </select>
+
+
+    <sql id="whereSql">
+        <where>
+            <if test="keyword!=null and keyword!=''">
+                and (name like concat('%',#{keyword},'%'))
+            </if>
+        </where>
+    </sql>
+
+    <!--//批量删除-->
+    <delete id="patchDel" parameterType="arraylist">
+        delete from t_order_product_log where id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.raths.serve.domain.OrderProductLog">
+    <result column="id" property="id" />
+        <result column="productOrder_id" property="productorderId" />
+        <result column="state" property="state" />
+        <result column="audit_id" property="auditId" />
+        <result column="audit_time" property="auditTime" />
+        <result column="note" property="note" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+id,
+        productOrder_id, state, audit_id, audit_time, note
+    </sql>
+
+</mapper>

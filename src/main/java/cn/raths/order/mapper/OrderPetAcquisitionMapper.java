@@ -15,4 +15,5 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface OrderPetAcquisitionMapper extends BaseMapper<OrderPetAcquisition> {
 
+    OrderPetAcquisition loadByMsgId(Long msgId);
 }

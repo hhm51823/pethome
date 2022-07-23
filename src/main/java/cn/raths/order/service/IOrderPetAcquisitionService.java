@@ -2,6 +2,7 @@ package cn.raths.order.service;
 
 import cn.raths.order.domain.OrderPetAcquisition;
 import cn.raths.basic.service.IBaseService;
+import cn.raths.order.dto.OrderConfirmationDto;
 
 /**
  * <p>
@@ -13,4 +14,7 @@ import cn.raths.basic.service.IBaseService;
  */
 public interface IOrderPetAcquisitionService extends IBaseService<OrderPetAcquisition> {
 
+    void confirm(OrderConfirmationDto orderConfirmationDto);
+
+    void handleCancel(Long id);
 }

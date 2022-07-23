@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.raths.serve.mapper.ProductDetailMapper">
+    <!--保存对象-->
+    <insert id="save" parameterType="ProductDetail" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into t_product_detail(
+                            product_id,
+                            orderNotice,
+                            intro
+        ) values(
+                #{productId},
+                #{orderNotice},
+                #{intro}        )
+    </insert>
+    <!--删除对象-->
+    <delete id="removeByProductId" parameterType="long">
+        delete from t_product_detail where product_id = #{productId}
+    </delete>
+
+     <!--删除对象-->
+    <delete id="remove" parameterType="long">
+        delete from t_product_detail where id = #{id}
+    </delete>
+
+    <!--更新对象-->
+    <update id="update" parameterType="ProductDetail">
+        update t_product_detail
+        set
+
+                            product_id = #{productId},
+                            orderNotice = #{orderNotice},
+                            intro = #{intro}        where id = #{id}
+    </update>
+    <!--根据ProductId加载对象-->
+    <select id="loadByProductId" resultType="ProductDetail" parameterType="long">
+        select * from t_product_detail where product_id = #{productId}
+    </select>
+
+    <!--加载对象-->
+    <select id="loadById" resultType="ProductDetail" parameterType="long">
+        select * from t_product_detail where id = #{id}
+    </select>
+    <!--加载所有对象-->
+    <select id="loadAll" resultType="ProductDetail">
+        select * from t_product_detail
+    </select>
+    <!--//查询总数=参数（查询对象），返回值：long-->
+    <select id="queryCount" parameterType="ProductDetailQuery" resultType="int">
+        select count(id) from t_product_detail
+        <include refid="whereSql"/>
+    </select>
+    <!--//查询当前页数据=参数（查询对象），返回值:List-->
+    <select id="queryList" parameterType="ProductDetailQuery" resultType="ProductDetail">
+        select * from t_product_detail
+        <include refid="whereSql"/>
+        limit #{begin},#{pageSize}
+    </select>
+
+
+    <sql id="whereSql">
+        <where>
+            <if test="keyword!=null and keyword!=''">
+                and (name like concat('%',#{keyword},'%'))
+            </if>
+        </where>
+    </sql>
+
+    <!--//批量删除-->
+    <delete id="patchDel" parameterType="arraylist">
+        delete from t_product_detail where id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.raths.serve.domain.ProductDetail">
+    <result column="id" property="id" />
+        <result column="product_id" property="productId" />
+        <result column="orderNotice" property="orderNotice" />
+        <result column="intro" property="intro" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+id,
+        product_id, orderNotice, intro
+    </sql>
+
+</mapper>

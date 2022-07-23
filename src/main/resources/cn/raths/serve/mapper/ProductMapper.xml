@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.raths.serve.mapper.ProductMapper">
+    <resultMap id="queryListResultMap" type="Product">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="costprice" property="costprice" />
+        <result column="saleprice" property="saleprice" />
+        <result column="resources" property="resources" />
+        <result column="salecount" property="salecount" />
+        <result column="state" property="state" />
+        <result column="offsaletime" property="offsaletime" />
+        <result column="onsaletime" property="onsaletime" />
+        <result column="createtime" property="createtime" />
+        <association property="detail" javaType="ProductDetail">
+            <id column="tpdId" property="id" />
+            <result column="orderNotice" property="orderNotice" />
+            <result column="intro" property="intro" />
+        </association>
+        <association property="shop" javaType="Shop">
+            <id column="tsId" property="id" />
+            <result column="tsName" property="name" />
+        </association>
+    </resultMap>
+
+    <!--保存对象-->
+    <insert id="save" parameterType="Product" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into t_product(
+                            name,
+                            costprice,
+                            saleprice,
+                            resources,
+                            salecount,
+                            state,
+                            offsaletime,
+                            onsaletime,
+                            createtime
+        ) values(
+                #{name},
+                #{costprice},
+                #{saleprice},
+                #{resources},
+                #{salecount},
+                #{state},
+                #{offsaletime},
+                #{onsaletime},
+                #{createtime}        )
+    </insert>
+    <!--删除对象-->
+    <delete id="remove" parameterType="long">
+        delete from t_product where id = #{id}
+    </delete>
+
+    <!--更新对象-->
+    <update id="update" parameterType="Product">
+        update t_product
+        set
+
+                            name = #{name},
+                            costprice = #{costprice},
+                            saleprice = #{saleprice},
+                            resources = #{resources},
+                            salecount = #{salecount},
+                            state = #{state},
+                            offsaletime = #{offsaletime},
+                            onsaletime = #{onsaletime},
+                            createtime = #{createtime}        where id = #{id}
+    </update>
+    <!--加载对象-->
+    <select id="loadById" resultMap="queryListResultMap" parameterType="long">
+        select tp.*, tpd.id tpdId,tpd.orderNotice orderNotice,tpd.intro intro,ts.id tsId,ts.name tsName
+        from t_product tp
+                left join t_product_detail tpd on tp.id = tpd.product_id
+                left join t_shop ts on tp.shopId = ts.id
+        where tp.id = #{id}
+    </select>
+    <!--加载所有对象-->
+    <select id="loadAll" resultType="Product">
+        select * from t_product
+    </select>
+    <!--//查询总数=参数（查询对象），返回值：long-->
+    <select id="queryCount" parameterType="ProductQuery" resultType="int">
+        select count(tp.id) from t_product tp
+        <include refid="whereSql"/>
+    </select>
+    <!--//查询当前页数据=参数（查询对象），返回值:List-->
+    <select id="queryList" parameterType="ProductQuery" resultMap="queryListResultMap">
+        select tp.*, tpd.id tpdId,tpd.orderNotice orderNotice,tpd.intro intro ,ts.id tsId,ts.name tsName
+        from t_product tp
+            left join t_product_detail tpd on tp.id = tpd.product_id
+            left join t_shop ts on tp.shopId = ts.id
+        <include refid="whereSql"/>
+        limit #{begin},#{pageSize}
+    </select>
+
+
+    <sql id="whereSql">
+        <where>
+            <if test="keyword!=null and keyword!=''">
+                and (tp.name like concat('%',#{keyword},'%'))
+            </if>
+            <if test="state != null">
+                and tp.state = #{state}
+            </if>
+        </where>
+    </sql>
+
+    <!--//批量删除-->
+    <delete id="patchDel" parameterType="arraylist">
+        delete from t_product where id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.raths.serve.domain.Product">
+    <result column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="costprice" property="costprice" />
+        <result column="saleprice" property="saleprice" />
+        <result column="resources" property="resources" />
+        <result column="salecount" property="salecount" />
+        <result column="state" property="state" />
+        <result column="offsaletime" property="offsaletime" />
+        <result column="onsaletime" property="onsaletime" />
+        <result column="createtime" property="createtime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+id,
+        name, costprice, saleprice, resources, salecount, state, offsaletime, onsaletime, createtime
+    </sql>
+
+
+    <update id="offsale">
+        update t_product set state = 0, offsaletime = DATE_FORMAT(now(),'%Y-%c-%d %h:%i:%s')
+        where id in
+        <foreach collection="list" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        and state = 1
+    </update>
+
+    <update id="onsale">
+        update t_product set state = 1, onsaletime = DATE_FORMAT(now(),'%Y-%c-%d %h:%i:%s')
+        where id in
+        <foreach collection="list" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        and state = 0
+    </update>
+
+</mapper>

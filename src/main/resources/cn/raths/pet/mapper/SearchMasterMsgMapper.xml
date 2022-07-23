@@ -1,6 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.raths.pet.mapper.SearchMasterMsgMapper">
+    <resultMap id="queryListResultMap" type="SearchMasterMsg">
+        <id column="id" property="id" />
+        <result column="title" property="title" />
+        <result column="state" property="state" />
+        <result column="name" property="name" />
+        <result column="age" property="age" />
+        <result column="gender" property="gender" />
+        <result column="coat_color" property="coatColor" />
+        <result column="resources" property="resources" />
+        <result column="pet_type" property="petType" />
+        <result column="price" property="price" />
+        <result column="address" property="address" />
+        <result column="user_id" property="userId" />
+        <result column="shop_id" property="shopId" />
+        <result column="note" property="note" />
+        <association property="shop" javaType="Shop">
+            <id column="shopId" property="id" />
+            <result column="shopName" property="name" />
+        </association>
+        <association property="user" javaType="User">
+            <id column="userId" property="id" />
+            <result column="username" property="username" />
+        </association>
+    </resultMap>
+
     <!--保存对象-->
     <insert id="save" parameterType="SearchMasterMsg" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         insert into t_search_master_msg(
@@ -66,12 +91,15 @@
     </select>
     <!--//查询总数=参数（查询对象），返回值：long-->
     <select id="queryCount" parameterType="SearchMasterMsgQuery" resultType="int">
-        select count(id) from t_search_master_msg
+        select count(ts.id) from t_search_master_msg ts
         <include refid="whereSql"/>
     </select>
     <!--//查询当前页数据=参数（查询对象），返回值:List-->
-    <select id="queryList" parameterType="SearchMasterMsgQuery" resultType="SearchMasterMsg">
-        select * from t_search_master_msg
+    <select id="queryList" parameterType="SearchMasterMsgQuery" resultMap="queryListResultMap">
+        select ts.*,tu.id userId,tu.username username,shop.id shopId,shop.name shopName
+        from t_search_master_msg ts
+            left join t_shop shop on shop.id = ts.shop_id
+            left join t_user tu on tu.id = ts.user_id
         <include refid="whereSql"/>
         limit #{begin},#{pageSize}
     </select>
@@ -80,7 +108,20 @@
     <sql id="whereSql">
         <where>
             <if test="keyword!=null and keyword!=''">
-                and (name like concat('%',#{keyword},'%'))
+                and (ts.name like concat('%',#{keyword},'%'))
+            </if>
+
+            <if test="userId!=null">
+                and ts.user_id = #{userId}
+            </if>
+            <if test="shopId!=null">
+                and ts.shop_id = #{shopId}
+            </if>
+            <if test="state!=null">
+                <if test="state == 1 and shopId == null">
+                    and shop_id is null
+                </if>
+                and ts.state = #{state}
             </if>
         </where>
     </sql>

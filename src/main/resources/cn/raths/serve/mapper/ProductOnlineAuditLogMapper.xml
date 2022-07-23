@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.raths.serve.mapper.ProductOnlineAuditLogMapper">
+    <resultMap id="queryListResultMap" type="ProductOnlineAuditLog">
+        <id column="id" property="id" />
+        <result column="product_id" property="productId" />
+        <result column="state" property="state" />
+        <result column="audit_id" property="auditId" />
+        <result column="audit_time" property="auditTime" />
+        <result column="note" property="note" />
+        <association property="product" javaType="Product">
+            <id column="tpId" property="id" />
+            <result column="tpName" property="name" />
+        </association>
+    </resultMap>
+    
+    <!--保存对象-->
+    <insert id="save" parameterType="ProductOnlineAuditLog" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into t_product_online_audit_log(
+                            product_id,
+                            state,
+                            audit_id,
+                            audit_time,
+                            note
+        ) values(
+                #{productId},
+                #{state},
+                #{auditId},
+                #{auditTime},
+                #{note}        )
+    </insert>
+    <!--删除对象-->
+    <delete id="remove" parameterType="long">
+        delete from t_product_online_audit_log where id = #{id}
+    </delete>
+
+    <!--更新对象-->
+    <update id="update" parameterType="ProductOnlineAuditLog">
+        update t_product_online_audit_log
+        set
+
+                            product_id = #{productId},
+                            state = #{state},
+                            audit_id = #{auditId},
+                            audit_time = #{auditTime},
+                            note = #{note}        where id = #{id}
+    </update>
+    <!--加载对象-->
+    <select id="loadById" resultType="ProductOnlineAuditLog" parameterType="long">
+        select * from t_product_online_audit_log where id = #{id}
+    </select>
+    <!--加载所有对象-->
+    <select id="loadAll" resultType="ProductOnlineAuditLog">
+        select * from t_product_online_audit_log
+    </select>
+    <!--//查询总数=参数（查询对象），返回值：long-->
+    <select id="queryCount" parameterType="ProductOnlineAuditLogQuery" resultType="int">
+        select count(log.id) from t_product_online_audit_log log
+            left join t_product tp on tp.id = log.product_id
+        <include refid="whereSql"/>
+    </select>
+    <!--//查询当前页数据=参数（查询对象），返回值:List-->
+    <select id="queryList" parameterType="ProductOnlineAuditLogQuery" resultMap="queryListResultMap">
+        select log.*,tp.id tpId, tp.name tpName from t_product_online_audit_log log
+            left join t_product tp on tp.id = log.product_id
+        <include refid="whereSql"/>
+        limit #{begin},#{pageSize}
+    </select>
+
+
+    <sql id="whereSql">
+        <where>
+            <if test="keyword!=null and keyword!=''">
+                and (tp.name like concat('%',#{keyword},'%'))
+            </if>
+        </where>
+    </sql>
+
+    <!--//批量删除-->
+    <delete id="patchDel" parameterType="arraylist">
+        delete from t_product_online_audit_log where id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.raths.serve.domain.ProductOnlineAuditLog">
+    <result column="id" property="id" />
+        <result column="product_id" property="productId" />
+        <result column="state" property="state" />
+        <result column="audit_id" property="auditId" />
+        <result column="audit_time" property="auditTime" />
+        <result column="note" property="note" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+id,
+        product_id, state, audit_id, audit_time, note
+    </sql>
+
+    <insert id="batchSave">
+        insert into t_product_online_audit_log( product_id,
+        state,
+        audit_id,
+        audit_time,
+        note
+        ) values
+        <foreach collection="list" item="log" separator=",">
+            (#{log.productId},
+            #{log.state},
+            #{log.auditId},
+            #{log.auditTime},
+            #{log.note})
+        </foreach>
+    </insert>
+
+</mapper>
