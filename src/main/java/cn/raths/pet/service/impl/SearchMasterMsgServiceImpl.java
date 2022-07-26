@@ -1,6 +1,7 @@
 package cn.raths.pet.service.impl;
 
 import cn.raths.basic.exception.BusinessException;
+import cn.raths.basic.service.impl.RocketMQProducer;
 import cn.raths.basic.utils.BaiduAuditUtils;
 import cn.raths.basic.utils.CodeGenerateUtils;
 import cn.raths.basic.utils.DistanceUtil;
@@ -54,6 +55,9 @@ public class SearchMasterMsgServiceImpl extends BaseServiceImpl<SearchMasterMsg>
 
     @Autowired
     private OrderPetAcquisitionMapper orderPetAcquisitionMapper;
+
+    @Autowired
+    private RocketMQProducer rocketMQProducer;
 
     @Override
     public void publish(SearchMasterMsg searchMasterMsg) {
@@ -127,7 +131,13 @@ public class SearchMasterMsgServiceImpl extends BaseServiceImpl<SearchMasterMsg>
         petMapper.save(pet);
         // 生成订单
         orderPetAcquisition = generateOrders(handlerMsgDto, searchMasterMsg, pet);
+
+
+
         orderPetAcquisitionMapper.save(orderPetAcquisition);
+
+        // 两天（两分钟）内没处理自动放回寻主池。传递收购订单id
+        rocketMQProducer.sendDelayMsg(orderPetAcquisition.getId().toString(),6);
     }
 
     /**

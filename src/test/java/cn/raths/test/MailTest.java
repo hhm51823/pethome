@@ -2,6 +2,7 @@ package cn.raths.test;
 
 import cn.raths.base.BaseTest;
 import cn.raths.basic.utils.MailUtil;
+import cn.raths.basic.utils.SmsUtils;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
@@ -31,9 +32,17 @@ public class MailTest extends BaseTest {
     // 邮件发送简单版本
     @Test
     public void sendMailEasy2() throws Exception{
-        String to = "1247780087@qq.com";
+        String to = "1170912437@qq.com";
         String subject = "店铺入驻请求被拒绝";
         String contnet = "太有问题了，我拒绝";
         MailUtil.sendSimpleMail(to, subject, contnet);
+    }
+
+    // 邮件发送简单版本
+    @Test
+    public void sms() throws Exception{
+        String phone = "15281052629";
+        String msg = "神奇不神奇！！1+1等于2";
+        SmsUtils.SendMsg(phone, msg);
     }
 }

@@ -1,0 +1,124 @@
+
+MQ：Message Queue，即消息队列 ，是一种提供消息队列服务的中间件，也称为消息中间件，
+    是一套提供了消息生产、存储、消费全过程的软件系统，遵循FIFO原则，消息即数据
+    MQ是弱一致性
+
+MQ作用：
+    1，消峰，消息生产者不会有大量的请求同时怼到消息消费者
+    2，服务异步调用，响应时间很快
+    3，服务彻底解耦，即使消费者挂掉也不影响生产者
+
+MQ的使用场景：
+    限流削峰
+    异步&解耦
+    数据收集
+    大数据处理
+
+常见的MQ：
+    ActiveMQ、RabbitMQ、RocketMQ、Kafka
+
+RocketMQ：
+    RocketMQ是一个统一消息引擎、轻量级数据处理平台
+    RocketMQ是⼀款阿⾥巴巴开源的消息中间件，国内⾸个互联⽹中间件在 Apache 上的顶级项⽬
+
+    RocketMQ架构主要分为4部分：
+        Producer：消息发布的角色，支持分布式集群方式部署，Producer通过MQ的负载均衡模块选择相应的Broker集群队列进行消息投递，投递的过程支持快速失败并且低延迟
+
+        Consumer：消息消费的角色，支持分布式集群方式部署
+
+        Broker：Broker是RocketMQ中比较重要的部分，主要负责消息的存储、投递和消息查询以及服务高可用保证
+
+        NameServer：NameServer主要包括两个功能：Broder管理、路由信息管理
+            Broder管理：NameServer接受Broker集群的注册信息并且保存下来作为路由信息的基本数据。然后提供心跳检测机制，检查Broker是否还存活
+            路由信息管理：每个NameServer将保存关于Broker集群的整个路由信息和用于客户端查询的队列信息。然后Producer和Conumser通过NameServer就可以
+                知道整个Broker集群的路由信息，从而进行消息的投递和消费
+
+    RabbitMQ工作流程：
+        - 启动NameServer，NameServer启动后监听端口，等待Broker、Producer、Consumer连上来，相当于一个路由控制中心
+
+        - Broker启动，跟所有的NameServer保持长连接，定时发送心跳包，心跳包中包含当前Broker信息/IP+端口等，以及存储所有Topic信息，
+            注册成功后，NameServer集群中就有Topic跟Broker的映射关系
+
+        - 收发消息前，先创建Topic，创建Topic时需要指定该Topic要存储在哪些Broker上，也可以在发送消息时自动创建Topic
+
+        - Producer发送消息，启动时先跟NameServer集群中的其中一台建立长连接，并从NameServer中获取当前发送的Topic存在哪些Broker上，
+            轮询从队列列表中选择一个队列，然后与队列所在的Broker建立长连接从而向Broker发消息
+
+        - Consumer跟Producer类似，跟其中一台NameServer建立长连接，获取当前订阅Topic存在哪些Broker上，然后直接跟Broker建立连接通道，
+            开始消费消息
+
+    RocketMQ网络部署特点：
+        - 为了增强Broker性能与吞吐量，Broker一般都是以集群形式出现的，各集群节点中可能存放着相同Topic的不同Queue
+
+        - 单点问题：如果一个Broker节点宕机了，为了保证数据不丢失，会给节点做集群
+
+        - Broker节点集群是一个主从集群，即集群中具有Master与Slave两种角色，Master负责处理读写操作请求，Slave负责对Master中的
+            数据进行备份，当Master挂掉了，Slave则会自动切换为Master去工作，所以这个Broker集群是主备集群，Consumer既可以从Master订阅消息，也可以从Slave订阅消息
+
+        - 一个Master可以包含多个Slave，但一个Slave只能隶属于一个Master，Master与Slave的对应关系是通过指定相同的BrokerName、
+            不同的BrokerId来确定的，BrokerId为0表示Master非0表示Slave，每个Broker与NameServer集群中的所有节点建立长连接，
+            定时注册Topic信息到所有NameServer
+
+    Producer 生产者：
+        - RocketMQ提供多种发送方式，同步发送、异步发送、顺序发送、单向发送，同步和异步方式均需要Broker返回确认信息，单向发送不需要
+
+        - RocketMQ中的消息生产者都是以生产者组（Producer Group）的形式出现的，生产者组是同一类生产者的集合，
+            这类Producer发送相同Topic类型的消息，一个生产者组可以同时发送多个主题的消息
+
+        - Producer会使用一定的算法选择把消息发送到哪个master的某个queue中
+
+    Consumer 消费者：
+        - Consumer 支持两种消费形式：拉取式消费、推动式消费。（主动，被动），RocketMQ中的消息消费者都是以消费者组（Consumer Group）的形式
+            出现的，消费者组是同一类消费者的集合，这类Consumer消费的是同一个Topic类型的消息，不同的 Consumer Group可以消费同一个Topic
+        - 一个Queue是不能被同一个ConsumerGroup中的多个Consumer消费的，目的是减少资源竞争提升整体性能
+        - 一个Consumer Group内的Consumer可以消费多个Topic的消息
+
+    Topic 消息主题
+        Topic表示一类消息的集合，每个topic主题包含若干条message消息，每条message消息只能属于一个topic主题，Topic是RocketMQ进行消息订阅的基本单位
+    Message：
+        消息是指，消息系统所传输信息的物理载体，生产和消费数据的最小单位，每条消息必须属于一个主题
+    Tag标签：
+        用于同一主题下区分不同类型的消息，来自同一业务单元的消息，可以根据不同业务目的在同一主题下设置不同标签
+        Topic是消息的一级分类，Tag是消息的二级分类
+    MessageQueue队列
+        一个Topic中可以包含多个Queue默认为4个，一 个Topic的Queue也被称为一个Topic中消息的分区（Partition）
+
+    Queue的分配算法：
+        平均分配【默认，一般用默认就够了】、环形平均策略、一致性Hash策略、同机房策略、平均分配性能比较高
+
+
+    消息的发送：
+        同步发送：
+            同步消息是发送者发送消息，需要等待结果的返回，才能继续发送第二条消息，这是一种阻塞式模型，虽然消息可靠性高，但是阻塞导致性能低
+        异步发送：
+            异步消息是发送者发送消息，无需等待发送结果就可以再发送第二条消息，它是通过回调的方式来获取到消息的发送结果，消息可靠性高，性能也高
+        单向发送：
+            这种方式指的是发送者发送消息后无需等待Broker的结果返回，Broker也不会返回结果，该方式性能最高，但是消息可靠性低
+
+        可靠性最高： 同步发送 >  异步发送 > 单向发送
+        性能最高：单向发送 > 异步发送 > 同步发送
+
+        延迟消息：
+            延迟消息：把消息写到Broker后需要延迟一定时间才能被消费 ， 在RocketMQ中消息的延迟时间不能任意指定，而是由特定的等级1级到18级来指定
+                messageDelayLevel=1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h
+            可以通过修改配置来增加级别，比如在mq安装目录的 broker.conf 文件中增加
+                messageDelayLevel=1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h 2d  这个时候总共就有19个level
+
+        事务消息：
+            分布式事务解决方案：2PC，TCC，最终一致性，最大努力通知，RocketMQ事务消息最终一致性方案等等
+
+            RocketMQ事务消息最终一致性方案：
+                - 往MQ中发送一个事务消息
+                - MQ返回结果是否发送成功
+                - 用户服务受到消息发送成功结果，保存用户数据，提交本地事务
+
+                1，发送消息到MQ
+                2，MQ返回签收消息响应
+                3，执行本地事务，返回MQ本地事务状态 Commit或者Rollback
+                4，MQ收到Commit则将消息推送给消费者
+                   MQ收到Rollback则将消息删除
+
+                   若一直未收到生产者的返回
+                   1，回查事务状态
+                   2，检查本地事务状态
+                   3，根据事务状态选择推送消息或删除消息
